@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mark Attendance</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      font-family: Arial, sans-serif; background: #eff6ff; padding: 16px; }
+    .card { width: 100%; max-width: 380px; background: #fff; border-radius: 14px; padding: 24px; text-align: center;
+      box-shadow: 0 4px 16px rgba(0,0,0,.1); }
+    h1 { margin: 0 0 4px; font-size: 20px; }
+    .sub { color: #6b7280; font-size: 14px; margin-bottom: 20px; }
+    input { width: 100%; padding: 14px; font-size: 18px; text-align: center; border: 2px solid #d1d5db; border-radius: 10px; }
+    button { width: 100%; margin-top: 14px; padding: 14px; font-size: 16px; font-weight: bold; color: #fff;
+      background: #2563eb; border: 0; border-radius: 10px; }
+    button:disabled { background: #9ca3af; }
+    .msg { margin-top: 16px; font-size: 14px; }
+    .err { color: #b91c1c; }
+    .ok { font-size: 56px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div id="form">
+      <h1 id="title">Mark Attendance</h1>
+      <div class="sub" id="subtitle">Loading...</div>
+      <input id="prn" inputmode="numeric" autocomplete="off" placeholder="Enter your PRN" />
+      <button id="submit" disabled>Mark me present</button>
+      <div class="msg err" id="error"></div>
+    </div>
+    <div id="done" style="display:none">
+      <div class="ok">&#9989;</div>
+      <h1>Attendance marked</h1>
+      <div class="sub" id="doneText"></div>
+    </div>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const sessionId = location.pathname.split('/').filter(Boolean).pop();
+    const token = new URLSearchParams(location.search).get('t');
+
+    // crypto.randomUUID needs HTTPS; this page is served over plain HTTP on the LAN, so build the id by hand.
+    function deviceId() {
+      let id = localStorage.getItem('deviceId');
+      if (!id) {
+        const bytes = crypto.getRandomValues(new Uint8Array(16));
+        id = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+        localStorage.setItem('deviceId', id);
+      }
+      return id;
+    }
+
+    function fail(message) {
+      $('error').textContent = message;
+      $('submit').disabled = false;
+    }
+
+    (async function init() {
+      $('prn').value = localStorage.getItem('prn') || '';
+      try {
+        const res = await fetch(`/api/student/session/${encodeURIComponent(sessionId)}`);
+        const s = await res.json();
+        if (!res.ok) throw new Error(s.error);
+        $('subtitle').textContent = [s.className, s.subject].filter(Boolean).join(' - ') || 'Class attendance';
+        if (!s.open) return fail('The attendance window is closed.'), ($('submit').disabled = true);
+        if (!token) return fail('Scan the QR code shown on the classroom screen.'), ($('submit').disabled = true);
+        $('submit').disabled = false;
+      } catch (err) {
+        $('subtitle').textContent = '';
+        fail(err.message || 'Could not reach the server. Are you on the college Wi-Fi?');
+        $('submit').disabled = true;
+      }
+    })();
+
+    $('submit').addEventListener('click', async () => {
+      const prn = $('prn').value.trim();
+      if (!prn) return fail('Enter your PRN.');
+      $('error').textContent = '';
+      $('submit').disabled = true;
+      try {
+        const res = await fetch('/api/mark', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId, token, prn, deviceId: deviceId() }),
+        });
+        const body = await res.json();
+        if (!res.ok) return fail(body.error || 'Something went wrong.');
+        localStorage.setItem('prn', prn);
+        $('form').style.display = 'none';
+        $('done').style.display = 'block';
+        $('doneText').textContent = `${body.name || prn} - ${new Date().toLocaleTimeString()}`;
+      } catch {
+        fail('Network error. Check your Wi-Fi and try again.');
+      }
+    });
+  </script>
+</body>
+</html>

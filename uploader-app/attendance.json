@@ -1,0 +1,15 @@
+[
+  {
+    "sessionId": "2026-08-06_TY-CSE_7CS301_0900",
+    "date": "2026-08-06",
+    "class": "TY-CSE",
+    "subject": "7CS301",
+    "period": "09:00-10:00",
+    "topicDesc": "recognition of tokens",
+    "students": [
+      { "roll": "245100002", "status": "present" },
+      { "roll": "245100003", "status": "absent" },
+      { "roll": "245100004", "status": "exemption" }
+    ]
+  }
+]

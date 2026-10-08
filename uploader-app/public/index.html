@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERP Uploader App</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f6f9; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h2 { margin-top: 0; color: #333; }
+        .session-card { border: 1px solid #ddd; padding: 15px; border-radius: 6px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; background: #fff; transition: box-shadow 0.2s; }
+        .session-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .upload-btn { background: #007bff; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.2s; }
+        .upload-btn:hover { background: #0056b3; }
+        .tag { background: #e9ecef; padding: 3px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; color: #495057; display: inline-block; margin-left: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Today's Attendance Sessions</h2>
+        <p style="color: #666; margin-bottom: 25px;">Select a session that you captured on your phone during class to upload it to the ERP.</p>
+        <div id="sessionsList">Loading sessions...</div>
+    </div>
+
+    <script>
+        async function fetchSessions() {
+            const res = await fetch('/api/sessions');
+            const sessions = await res.json();
+            const list = document.getElementById('sessionsList');
+            list.innerHTML = '';
+            
+            if (sessions.length === 0) {
+                list.innerHTML = '<p>No sessions recorded for today.</p>';
+                return;
+            }
+
+            sessions.forEach(s => {
+                const card = document.createElement('div');
+                card.className = 'session-card';
+                card.innerHTML = `
+                    <div>
+                        <h4 style="margin: 0 0 5px 0;">${s.class} - ${s.subject} <span class="tag">${s.period}</span></h4>
+                        <div style="font-size: 13px; color: #666;">
+                            Topic: ${s.topicDesc} <br>
+                            Students: ${s.students.length} recorded
+                        </div>
+                    </div>
+                    <button class="upload-btn" onclick="uploadSession('${s.sessionId}')">Upload to ERP</button>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        async function uploadSession(sessionId) {
+            alert("Starting Playwright automation! A new Chrome browser will launch.\n\nPlease log in and navigate to the class list manually, and the script will take over from there!");
+            await fetch('/api/upload', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sessionId })
+            });
+        }
+
+        fetchSessions();
+    </script>
+</body>
+</html>

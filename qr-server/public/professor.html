@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>QR Attendance - Professor Dashboard</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Arial, sans-serif; background: #f3f4f6; color: #1f2937; }
+    header { background: #2563eb; color: #fff; padding: 14px 24px; }
+    header h1 { margin: 0; font-size: 20px; }
+    header p { margin: 4px 0 0; font-size: 12px; opacity: .85; }
+    main { max-width: 900px; margin: 24px auto; padding: 0 16px; }
+    .card { background: #fff; border-radius: 10px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+    label { display: block; font-size: 13px; margin: 10px 0 4px; font-weight: bold; }
+    input { width: 100%; padding: 9px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; }
+    button, .btn { display: inline-block; padding: 10px 16px; border: 0; border-radius: 6px; background: #2563eb; color: #fff;
+      font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none; }
+    button.secondary, .btn.secondary { background: #e5e7eb; color: #1f2937; }
+    button.danger { background: #dc2626; }
+    .row { display: flex; gap: 12px; flex-wrap: wrap; }
+    .row > div { flex: 1; min-width: 160px; }
+    .hidden { display: none; }
+    .error { color: #b91c1c; font-size: 13px; margin-top: 10px; }
+    .session { display: flex; gap: 28px; flex-wrap: wrap; align-items: flex-start; }
+    .qr img { width: 320px; height: 320px; border: 1px solid #e5e7eb; border-radius: 8px; }
+    .qr .url { font-size: 11px; color: #6b7280; word-break: break-all; max-width: 320px; margin-top: 6px; }
+    .stats { flex: 1; min-width: 260px; }
+    .big { font-size: 42px; font-weight: bold; color: #2563eb; }
+    .timer { font-size: 28px; font-variant-numeric: tabular-nums; }
+    .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+    .badge.open { background: #dcfce7; color: #166534; }
+    .badge.closed { background: #fee2e2; color: #991b1b; }
+    ul { list-style: none; margin: 8px 0 0; padding: 0; max-height: 220px; overflow: auto; font-size: 13px; }
+    li { padding: 5px 0; border-bottom: 1px solid #f3f4f6; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { text-align: left; padding: 7px 6px; border-bottom: 1px solid #f3f4f6; }
+    .code { font-family: monospace; font-size: 18px; background: #eff6ff; padding: 2px 8px; border-radius: 4px; }
+    .actions { margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>QR Attendance - Professor Dashboard</h1>
+    <p id="info">Loading...</p>
+  </header>
+
+  <main>
+    <section id="setup" class="card hidden">
+      <h2 style="margin-top:0">Start a new session</h2>
+      <div class="row">
+        <div><label for="className">Class</label><input id="className" placeholder="TY-CSE" /></div>
+        <div><label for="subject">Subject</label><input id="subject" placeholder="7CS301" /></div>
+        <div><label for="duration">Window (minutes)</label><input id="duration" type="number" min="1" max="60" value="2" /></div>
+      </div>
+      <div class="actions"><button id="startBtn">Start session and show QR</button></div>
+      <div id="setupError" class="error"></div>
+    </section>
+
+    <section id="live" class="card hidden">
+      <div class="session">
+        <div class="qr">
+          <img id="qrImg" alt="Attendance QR code" class="hidden" />
+          <div id="qrClosed" class="hidden" style="width:320px;padding:40px 0;text-align:center;color:#6b7280">Attendance window closed.</div>
+          <div class="url" id="qrUrl"></div>
+        </div>
+        <div class="stats">
+          <div><span id="sessionLabel" style="font-weight:bold"></span> <span id="badge" class="badge"></span></div>
+          <div style="margin-top:8px;font-size:13px">Session code (for the extension): <span class="code" id="sessionCode"></span></div>
+          <div style="margin-top:16px;font-size:13px;color:#6b7280">Present</div>
+          <div class="big"><span id="presentCount">0</span> / <span id="total">0</span></div>
+          <div style="margin-top:8px;font-size:13px;color:#6b7280">Time left</div>
+          <div class="timer" id="timer">--:--</div>
+          <div class="actions">
+            <button id="endBtn" class="danger">End session now</button>
+            <a id="csvBtn" class="btn secondary" href="#">Download absent_students.csv</a>
+            <button id="cloudBtn" class="btn" style="background:#059669;">☁️ Sync to MongoDB</button>
+            <button id="newBtn" class="secondary hidden">New session</button>
+          </div>
+          <div id="cloudStatus" style="font-size:13px; font-weight:bold; margin-top:8px;"></div>
+          <div id="liveError" class="error"></div>
+        </div>
+      </div>
+      <h3 style="margin-bottom:0">Latest check-ins</h3>
+      <ul id="recent"></ul>
+    </section>
+
+    <section id="history" class="card hidden">
+      <h2 style="margin-top:0">Previous sessions</h2>
+      <table>
+        <thead><tr><th>Code</th><th>Class</th><th>Subject</th><th>Started</th><th>Present</th><th></th></tr></thead>
+        <tbody id="historyBody"></tbody>
+      </table>
+    </section>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    let currentId = null;
+    let pollTimer = null;
+
+    const pathParts = window.location.pathname.split('/').filter(Boolean);
+    const secretKey = (pathParts.length && !['dashboard', 'admin'].includes(pathParts[pathParts.length - 1])) ? pathParts[pathParts.length - 1] : (localStorage.getItem('wce_prof_key') || '');
+    if (secretKey) localStorage.setItem('wce_prof_key', secretKey);
+
+    async function api(path, options = {}) {
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(secretKey ? { 'X-Professor-Key': secretKey } : {}),
+        ...(options.headers || {})
+      };
+      const res = await fetch(path, { ...options, headers });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(body.error || res.statusText);
+      return body;
+    }
+
+    const fmtTime = (sec) => `${String(Math.floor(sec / 60)).padStart(2, '0')}:${String(sec % 60).padStart(2, '0')}`;
+
+    async function renderHistory() {
+      const sessions = await api('/api/sessions');
+      $('history').classList.toggle('hidden', sessions.length === 0);
+      const body = $('historyBody');
+      body.textContent = '';
+      for (const s of sessions) {
+        const tr = document.createElement('tr');
+        const cells = [s.id, s.className || '-', s.subject || '-', new Date(s.createdAt).toLocaleString(), `${s.presentCount} / ${s.total}`];
+        for (const text of cells) {
+          const td = document.createElement('td');
+          td.textContent = text;
+          tr.appendChild(td);
+        }
+        const td = document.createElement('td');
+        const a = document.createElement('a');
+        a.href = `/api/sessions/${s.id}/absent.csv`;
+        a.textContent = 'CSV';
+        td.appendChild(a);
+        tr.appendChild(td);
+        body.appendChild(tr);
+      }
+    }
+
+    function showSetup() {
+      clearInterval(pollTimer);
+      currentId = null;
+      $('live').classList.add('hidden');
+      $('setup').classList.remove('hidden');
+      renderHistory();
+    }
+
+    function watch(id) {
+      currentId = id;
+      $('setup').classList.add('hidden');
+      $('live').classList.remove('hidden');
+      $('sessionCode').textContent = id;
+      $('csvBtn').href = `/api/sessions/${id}/absent.csv`;
+      clearInterval(pollTimer);
+      poll();
+      pollTimer = setInterval(poll, 2000);
+    }
+
+    async function poll() {
+      try {
+        const s = await api(`/api/sessions/${currentId}`);
+        $('liveError').textContent = '';
+        $('sessionLabel').textContent = [s.className, s.subject].filter(Boolean).join(' - ') || 'Session';
+        $('badge').textContent = s.open ? 'OPEN' : 'CLOSED';
+        $('badge').className = `badge ${s.open ? 'open' : 'closed'}`;
+        $('presentCount').textContent = s.presentCount;
+        $('total').textContent = s.total;
+        $('timer').textContent = s.open ? fmtTime(s.remainingSec) : '00:00';
+
+        $('qrImg').classList.toggle('hidden', !s.open);
+        $('qrClosed').classList.toggle('hidden', s.open);
+        $('endBtn').classList.toggle('hidden', !s.open);
+        $('newBtn').classList.toggle('hidden', s.open);
+        if (s.open) {
+          $('qrImg').src = s.qr;
+          $('qrUrl').textContent = s.qrUrl;
+        } else {
+          $('qrUrl').textContent = '';
+          clearInterval(pollTimer);
+        }
+
+        const list = $('recent');
+        list.textContent = '';
+        for (const r of s.recent) {
+          const li = document.createElement('li');
+          li.textContent = `${new Date(r.at).toLocaleTimeString()}  ${r.prn}  ${r.name}`;
+          list.appendChild(li);
+        }
+      } catch (err) {
+        $('liveError').textContent = err.message;
+      }
+    }
+
+    $('startBtn').addEventListener('click', async () => {
+      $('setupError').textContent = '';
+      try {
+        const { id } = await api('/api/sessions', {
+          method: 'POST',
+          body: JSON.stringify({
+            className: $('className').value,
+            subject: $('subject').value,
+            durationMinutes: Number($('duration').value),
+          }),
+        });
+        watch(id);
+      } catch (err) {
+        $('setupError').textContent = err.message;
+      }
+    });
+
+    $('endBtn').addEventListener('click', async () => {
+      if (!confirm('End the session now? Students who have not scanned will be marked absent.')) return;
+      $('cloudStatus').textContent = '⏳ Ending session and saving to MongoDB...';
+      $('cloudStatus').style.color = '#2563eb';
+      await api(`/api/sessions/${currentId}/end`, { method: 'POST' });
+      $('cloudStatus').textContent = '✅ Synced to MongoDB Cloud!';
+      $('cloudStatus').style.color = '#059669';
+      poll();
+    });
+
+    $('csvBtn').addEventListener('click', () => {
+      $('cloudStatus').textContent = '✅ Downloaded CSV & synced to MongoDB Cloud!';
+      $('cloudStatus').style.color = '#059669';
+    });
+
+    $('cloudBtn').addEventListener('click', async () => {
+      if (!currentId) return;
+      $('cloudStatus').textContent = '⏳ Syncing to MongoDB...';
+      $('cloudStatus').style.color = '#2563eb';
+      try {
+        const res = await api(`/api/sessions/${currentId}/sync-cloud`, { method: 'POST' });
+        if (res.ok) {
+          $('cloudStatus').textContent = `✅ Synced to MongoDB Cloud (${res.data.absentCount} absent, ${res.data.presentCount} present)!`;
+          $('cloudStatus').style.color = '#059669';
+        }
+      } catch (err) {
+        $('cloudStatus').textContent = `❌ Cloud sync error: ${err.message}`;
+        $('cloudStatus').style.color = '#dc2626';
+      }
+    });
+
+    $('newBtn').addEventListener('click', () => {
+      $('cloudStatus').textContent = '';
+      showSetup();
+    });
+
+    (async function init() {
+      try {
+        const info = await api('/api/info');
+        $('info').textContent = `Students open: ${info.publicUrl}   |   Roster: ${info.rosterSize} students (${info.rosterFile})`;
+        const sessions = await api('/api/sessions');
+        const open = sessions.find((s) => s.open);
+        if (open) watch(open.id);
+        else showSetup();
+      } catch (err) {
+        $('info').textContent = `Error: ${err.message}`;
+        showSetup();
+      }
+    })();
+  </script>
+</body>
+</html>

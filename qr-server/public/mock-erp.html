@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Walchand College of Engineering - ERP Attendance (MOCK SIMULATOR)</title>
+  <style>
+    body { font-family: Tahoma, Arial, sans-serif; background: #eef2f5; margin: 20px; color: #222; }
+    .header { background: #1e3a8a; color: white; padding: 12px 20px; border-radius: 6px 6px 0 0; display:flex; justify-content:space-between; align-items:center; }
+    .header h2 { margin: 0; font-size: 16px; font-weight: bold; }
+    .container { background: white; border: 1px solid #cbd5e1; border-top: none; padding: 20px; border-radius: 0 0 6px 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .info-bar { background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px 14px; margin-bottom: 15px; border-radius: 4px; font-size: 13px; line-height: 1.6; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
+    th { background: #0284c7; color: white; padding: 8px 6px; text-align: left; font-size: 11px; }
+    td { border: 1px solid #d8e9ec; padding: 6px 8px; vertical-align: middle; }
+    .btn-status {
+      display: inline-block; cursor: pointer; padding: 4px 10px; border-radius: 3px;
+      font-weight: bold; font-size: 11px; text-align: center; border: 1px solid #bbb;
+      box-shadow: 1px 1px 3px rgba(0,0,0,0.15); user-select: none;
+    }
+    .status-present { color: green; background: #ecfdf5; border-color: #6ee7b7; }
+    .status-absent { color: red; background: #fef2f2; border-color: #fca5a5; }
+    .actions { margin-top: 20px; display: flex; gap: 10px; }
+    .btn-save { background: #16a34a; color: white; border: none; padding: 9px 20px; font-weight: bold; border-radius: 4px; cursor: pointer; font-size: 13px; }
+    .btn-save:hover { background: #15803d; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h2>Walchand College of Engineering - Student Attendance Marking (ERP Test Simulator)</h2>
+    <span style="font-size:12px; background:#f59e0b; color:#000; padding:3px 8px; border-radius:4px; font-weight:bold;">TEST MODE</span>
+  </div>
+
+  <div class="container">
+    <div class="info-bar">
+      <b>Class:</b> TY-CSE &nbsp;|&nbsp; <b>Course:</b> 7CS301 Compiler Construction &nbsp;|&nbsp; <b>Date:</b> <span id="currentDate"></span><br>
+      <span style="color:#059669; font-weight:bold;">💡 The Chrome Extension will detect this page automatically (looks for <code>td[id$="_tdRollNo"]</code>).</span>
+    </div>
+
+    <table id="tblStudentList">
+      <thead>
+        <tr>
+          <th style="width: 40px; text-align: center;">Sr</th>
+          <th style="width: 100px;">PRN</th>
+          <th>Student Name</th>
+          <th style="width: 100px;">Roll No</th>
+          <th style="width: 120px; text-align: center;">Status (Click to toggle)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Student 1 -->
+        <tr id="rptstudentlist_ctl00_trStudRow">
+          <td align="center" id="rptstudentlist_ctl00_td1">1</td>
+          <td id="rptstudentlist_ctl00_td7">23510055</td>
+          <td id="rptstudentlist_ctl00_tdstudentname">Rakshit Gawde</td>
+          <td id="rptstudentlist_ctl00_tdRollNo">23510055</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl00_spn1" onclick="toggleStatus('rptstudentlist_ctl00')">PRESENT</span>
+            <input id="rptstudentlist_ctl00_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+
+        <!-- Student 2 -->
+        <tr id="rptstudentlist_ctl01_trStudRow">
+          <td align="center" id="rptstudentlist_ctl01_td1">2</td>
+          <td id="rptstudentlist_ctl01_td7">245100002</td>
+          <td id="rptstudentlist_ctl01_tdstudentname">Netra Karoshe</td>
+          <td id="rptstudentlist_ctl01_tdRollNo">245100002</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl01_spn1" onclick="toggleStatus('rptstudentlist_ctl01')">PRESENT</span>
+            <input id="rptstudentlist_ctl01_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+
+        <!-- Student 3 -->
+        <tr id="rptstudentlist_ctl02_trStudRow">
+          <td align="center" id="rptstudentlist_ctl02_td1">3</td>
+          <td id="rptstudentlist_ctl02_td7">245100003</td>
+          <td id="rptstudentlist_ctl02_tdstudentname">Shubham Shashikant Koti</td>
+          <td id="rptstudentlist_ctl02_tdRollNo">245100003</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl02_spn1" onclick="toggleStatus('rptstudentlist_ctl02')">PRESENT</span>
+            <input id="rptstudentlist_ctl02_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+
+        <!-- Student 4 -->
+        <tr id="rptstudentlist_ctl03_trStudRow">
+          <td align="center" id="rptstudentlist_ctl03_td1">4</td>
+          <td id="rptstudentlist_ctl03_td7">245100004</td>
+          <td id="rptstudentlist_ctl03_tdstudentname">Rahul Namdev Bhala</td>
+          <td id="rptstudentlist_ctl03_tdRollNo">245100004</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl03_spn1" onclick="toggleStatus('rptstudentlist_ctl03')">PRESENT</span>
+            <input id="rptstudentlist_ctl03_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+
+        <!-- Student 5 -->
+        <tr id="rptstudentlist_ctl04_trStudRow">
+          <td align="center" id="rptstudentlist_ctl04_td1">5</td>
+          <td id="rptstudentlist_ctl04_td7">245100005</td>
+          <td id="rptstudentlist_ctl04_tdstudentname">Ketaki Suhas Kulkarni</td>
+          <td id="rptstudentlist_ctl04_tdRollNo">245100005</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl04_spn1" onclick="toggleStatus('rptstudentlist_ctl04')">PRESENT</span>
+            <input id="rptstudentlist_ctl04_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+
+        <!-- Student 6 -->
+        <tr id="rptstudentlist_ctl05_trStudRow">
+          <td align="center" id="rptstudentlist_ctl05_td1">6</td>
+          <td id="rptstudentlist_ctl05_td7">245100006</td>
+          <td id="rptstudentlist_ctl05_tdstudentname">Om Ramesh Mane</td>
+          <td id="rptstudentlist_ctl05_tdRollNo">245100006</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl05_spn1" onclick="toggleStatus('rptstudentlist_ctl05')">PRESENT</span>
+            <input id="rptstudentlist_ctl05_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+
+        <!-- Student 7 -->
+        <tr id="rptstudentlist_ctl06_trStudRow">
+          <td align="center" id="rptstudentlist_ctl06_td1">7</td>
+          <td id="rptstudentlist_ctl06_td7">245100007</td>
+          <td id="rptstudentlist_ctl06_tdstudentname">Shrenika Sajjankumar Patil</td>
+          <td id="rptstudentlist_ctl06_tdRollNo">245100007</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl06_spn1" onclick="toggleStatus('rptstudentlist_ctl06')">PRESENT</span>
+            <input id="rptstudentlist_ctl06_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+
+        <!-- Student 8 -->
+        <tr id="rptstudentlist_ctl07_trStudRow">
+          <td align="center" id="rptstudentlist_ctl07_td1">8</td>
+          <td id="rptstudentlist_ctl07_td7">245100008</td>
+          <td id="rptstudentlist_ctl07_tdstudentname">Dhanashree Sagar Hodage</td>
+          <td id="rptstudentlist_ctl07_tdRollNo">245100008</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl07_spn1" onclick="toggleStatus('rptstudentlist_ctl07')">PRESENT</span>
+            <input id="rptstudentlist_ctl07_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+
+        <!-- Student 9 -->
+        <tr id="rptstudentlist_ctl08_trStudRow">
+          <td align="center" id="rptstudentlist_ctl08_td1">9</td>
+          <td id="rptstudentlist_ctl08_td7">245100009</td>
+          <td id="rptstudentlist_ctl08_tdstudentname">Vaishnavi Kamalekar</td>
+          <td id="rptstudentlist_ctl08_tdRollNo">245100009</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl08_spn1" onclick="toggleStatus('rptstudentlist_ctl08')">PRESENT</span>
+            <input id="rptstudentlist_ctl08_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+
+        <!-- Student 10 -->
+        <tr id="rptstudentlist_ctl09_trStudRow">
+          <td align="center" id="rptstudentlist_ctl09_td1">10</td>
+          <td id="rptstudentlist_ctl09_td7">245100010</td>
+          <td id="rptstudentlist_ctl09_tdstudentname">Shravan Sahekar</td>
+          <td id="rptstudentlist_ctl09_tdRollNo">245100010</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl09_spn1" onclick="toggleStatus('rptstudentlist_ctl09')">PRESENT</span>
+            <input id="rptstudentlist_ctl09_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="actions">
+      <input class="btn-save" id="btnPopUpSave" name="btnPopUpSave" type="button" value="Update (Save Attendance)" onclick="alert('Mock ERP: Attendance updated successfully in database!')" />
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-GB');
+
+    // Mimics the ASP.NET funFocus1 function on the live ERP
+    function toggleStatus(ctl) {
+      const spn = document.getElementById(ctl + '_spn1');
+      const hdn = document.getElementById(ctl + '_hdnONE');
+      if (hdn.value === 'PRESENT') {
+        hdn.value = 'ABSENT';
+        spn.textContent = 'ABSENT';
+        spn.className = 'btn-status status-absent';
+      } else {
+        hdn.value = 'PRESENT';
+        spn.textContent = 'PRESENT';
+        spn.className = 'btn-status status-present';
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "erp-attendance-uploader",
+  "version": "1.0.0",
+  "description": "Semi-Automated ERP Attendance & Topic Uploader",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.22.2",
+    "playwright": "^1.62.1"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "qr-attendance-server",
+  "version": "1.0.0",
+  "description": "Phase 2: QR-based attendance check-in server that generates absent_students.csv for the ERP Attendance Automator extension",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "dotenv": "^18.0.6",
+    "express": "^4.21.2",
+    "mongoose": "^9.11.1",
+    "papaparse": "^5.4.1",
+    "qrcode": "^1.5.4"
+  }
+}

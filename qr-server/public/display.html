@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Classroom Attendance - Walchand College of Engineering</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background-color: #f8fafc;
+      color: #1e293b;
+      margin: 0;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 800px;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .header {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 22px;
+      color: #0f172a;
+      font-weight: bold;
+    }
+    .header p {
+      margin: 6px 0 0 0;
+      font-size: 13px;
+      color: #64748b;
+    }
+
+    /* Idle View */
+    #state-idle {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 60px 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+    #state-idle h2 {
+      font-size: 20px;
+      color: #334155;
+      margin-bottom: 8px;
+    }
+    #state-idle p {
+      font-size: 14px;
+      color: #64748b;
+      margin: 0;
+    }
+
+    /* Active View - High up, only QR, Timing & People */
+    #state-active {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding-top: 10px;
+    }
+
+    .qr-frame {
+      background: #ffffff;
+      border: 2px solid #0f172a;
+      border-radius: 12px;
+      padding: 14px;
+      display: inline-block;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    }
+    .qr-frame img {
+      width: 400px;
+      height: 400px;
+      display: block;
+    }
+
+    .timer-text {
+      font-size: 44px;
+      font-weight: bold;
+      color: #dc2626;
+      font-variant-numeric: tabular-nums;
+      margin-top: 14px;
+      letter-spacing: -0.02em;
+    }
+
+    .count-text {
+      font-size: 22px;
+      font-weight: bold;
+      color: #16a34a;
+      margin-top: 6px;
+    }
+
+    /* Closed View */
+    #state-closed {
+      display: none;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 60px 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+    #state-closed h2 {
+      font-size: 22px;
+      color: #0f172a;
+      margin-bottom: 8px;
+    }
+    #state-closed p {
+      font-size: 15px;
+      color: #475569;
+      margin: 0;
+    }
+
+    .footer {
+      margin-top: 25px;
+      font-size: 12px;
+      color: #94a3b8;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Header (Hidden when QR is active) -->
+    <div class="header" id="mainHeader">
+      <h1>Walchand College of Engineering, Sangli</h1>
+      <p>Student Attendance System • Classroom Screen</p>
+    </div>
+
+    <!-- IDLE SCREEN -->
+    <div id="state-idle">
+      <h2>Session Not Started</h2>
+      <p>Waiting for the faculty to start the attendance session...</p>
+    </div>
+
+    <!-- ACTIVE SCREEN: Only QR, Timing & People count right at the top -->
+    <div id="state-active">
+      <div class="qr-frame">
+        <img id="qrImage" alt="Attendance QR Code" />
+      </div>
+
+      <div class="timer-text" id="timerDisplay">02:00</div>
+      <div class="count-text" id="countDisplay">0 students marked present</div>
+    </div>
+
+    <!-- CLOSED SCREEN -->
+    <div id="state-closed">
+      <h2>Attendance Window Closed</h2>
+      <p id="closedSummary">The session has ended.</p>
+    </div>
+  </div>
+
+  <div class="footer" id="mainFooter">
+    Connect to college Wi-Fi to submit attendance.
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const fmtTime = (sec) => `${String(Math.floor(sec / 60)).padStart(2, '0')}:${String(sec % 60).padStart(2, '0')}`;
+
+    let lastState = null;
+
+    async function poll() {
+      try {
+        const res = await fetch('/api/display/live');
+        if (!res.ok) return;
+        const data = await res.json();
+
+        if (data.open) {
+          // HIDE HEADERS & IDLE STATE - Only QR, Timing, People
+          $('mainHeader').style.display = 'none';
+          $('mainFooter').style.display = 'none';
+          $('state-idle').style.display = 'none';
+          $('state-closed').style.display = 'none';
+          $('state-active').style.display = 'flex';
+
+          $('qrImage').src = data.qr;
+          $('timerDisplay').textContent = fmtTime(data.remainingSec);
+          $('countDisplay').textContent = `${data.presentCount} student(s) marked present`;
+          lastState = 'open';
+        } else if (data.hasSession && lastState === 'open') {
+          // CLOSED STATE
+          $('mainHeader').style.display = 'block';
+          $('mainFooter').style.display = 'block';
+          $('state-idle').style.display = 'none';
+          $('state-active').style.display = 'none';
+          $('state-closed').style.display = 'block';
+          $('closedSummary').textContent = `Attendance closed. Total present: ${data.presentCount}.`;
+
+          setTimeout(() => {
+            if (lastState !== 'open') {
+              $('state-closed').style.display = 'none';
+              $('state-idle').style.display = 'block';
+            }
+          }, 10000);
+          lastState = 'closed';
+        } else if (lastState !== 'closed') {
+          // IDLE STATE
+          $('mainHeader').style.display = 'block';
+          $('mainFooter').style.display = 'block';
+          $('state-active').style.display = 'none';
+          $('state-closed').style.display = 'none';
+          $('state-idle').style.display = 'block';
+        }
+      } catch (e) {
+        // network issue
+      }
+    }
+
+    setInterval(poll, 1500);
+    poll();
+  </script>
+</body>
+</html>

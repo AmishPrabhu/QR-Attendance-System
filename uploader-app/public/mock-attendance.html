@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mock ERP Attendance</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
+        .buttons { cursor: pointer; user-select: none; font-weight: bold; }
+    </style>
+    <script>
+        function funFocus1(element) {
+            // Get the row ID prefix (e.g. rptstudentlist_ctl00)
+            const rowId = element.id.replace('_spn1', '');
+            const hdn = document.getElementById(rowId + '_hdnONE');
+            
+            // Cycle: PRESENT -> ABSENT -> EXEMPTION -> PRESENT
+            if (hdn.value === 'PRESENT') {
+                hdn.value = 'ABSENT';
+                element.innerText = 'ABSENT';
+                element.style.color = 'red';
+            } else if (hdn.value === 'ABSENT') {
+                hdn.value = 'EXEMPTION';
+                element.innerText = 'EXEMPTION';
+                element.style.color = 'orange';
+            } else {
+                hdn.value = 'PRESENT';
+                element.innerText = 'PRESENT';
+                element.style.color = 'green';
+            }
+        }
+    </script>
+</head>
+<body>
+    <h2>Mock ERP Attendance Sheet</h2>
+    <p>This simulates the real ERP page so you can test Playwright locally without a professor login!</p>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Sr No.</th>
+                <th>Roll No</th>
+                <th>Student Name</th>
+                <th>Status (Click to cycle)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Student 1 -->
+            <tr id="rptstudentlist_ctl00_trStudRow">
+                <td>1</td>
+                <td id="rptstudentlist_ctl00_tdRollNo">245100002</td>
+                <td>KAROSHE NETRA S.</td>
+                <td id="rptstudentlist_ctl00_spn1" class="buttons" style="color: green;" onclick="funFocus1(this)">PRESENT</td>
+                <td style="display:none;"><input type="hidden" id="rptstudentlist_ctl00_hdnONE" value="PRESENT"></td>
+            </tr>
+            <!-- Student 2 -->
+            <tr id="rptstudentlist_ctl01_trStudRow">
+                <td>2</td>
+                <td id="rptstudentlist_ctl01_tdRollNo">245100003</td>
+                <td>SMITH JOHN</td>
+                <td id="rptstudentlist_ctl01_spn1" class="buttons" style="color: green;" onclick="funFocus1(this)">PRESENT</td>
+                <td style="display:none;"><input type="hidden" id="rptstudentlist_ctl01_hdnONE" value="PRESENT"></td>
+            </tr>
+            <!-- Student 3 -->
+            <tr id="rptstudentlist_ctl02_trStudRow">
+                <td>3</td>
+                <td id="rptstudentlist_ctl02_tdRollNo">245100004</td>
+                <td>DOE JANE</td>
+                <td id="rptstudentlist_ctl02_spn1" class="buttons" style="color: green;" onclick="funFocus1(this)">PRESENT</td>
+                <td style="display:none;"><input type="hidden" id="rptstudentlist_ctl02_hdnONE" value="PRESENT"></td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <br>
+    <input type="submit" id="btnPopUpSave" value="Update" style="padding: 10px 20px; font-weight: bold;">
+</body>
+</html>

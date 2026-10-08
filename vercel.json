@@ -2,17 +2,17 @@
   "version": 2,
   "builds": [
     {
-      "src": "server.js",
+      "src": "qr-server/server.js",
       "use": "@vercel/node",
       "config": {
-        "includeFiles": ["public/**", "roster.csv"]
+        "includeFiles": ["qr-server/public/**", "qr-server/roster.csv"]
       }
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "server.js"
+      "dest": "qr-server/server.js"
     }
   ]
 }

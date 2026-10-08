@@ -28,16 +28,20 @@ const PROFESSOR_KEY = (() => {
     // no key yet: create one below
   }
   const key = crypto.randomBytes(6).toString('hex'); // 12 characters
-  fs.mkdirSync(path.dirname(KEY_FILE), { recursive: true });
-  fs.writeFileSync(KEY_FILE, key);
+  try {
+    fs.mkdirSync(path.dirname(KEY_FILE), { recursive: true });
+    fs.writeFileSync(KEY_FILE, key);
+  } catch {}
   return key;
 })();
 const TOKEN_WINDOW_MS = 30 * 1000; // QR code rotates every 30s so a photo of it quickly becomes useless
 const MIN_DURATION_MIN = 1;
 const MAX_DURATION_MIN = 60;
-const EXPORT_DIR = path.join(__dirname, 'exports');
+const EXPORT_DIR = process.env.VERCEL ? path.join(os.tmpdir(), 'exports') : path.join(__dirname, 'exports');
 
-fs.mkdirSync(EXPORT_DIR, { recursive: true });
+try {
+  fs.mkdirSync(EXPORT_DIR, { recursive: true });
+} catch {}
 
 const app = express();
 app.use(express.json({ limit: '2kb' }));
@@ -53,8 +57,13 @@ function lanAddress() {
   return 'localhost';
 }
 
-// Students' phones must reach this URL, so it uses the laptop's LAN IP (override with PUBLIC_URL).
-const publicUrl = () => (process.env.PUBLIC_URL || `http://${lanAddress()}:${PORT}`).replace(/\/+$/, '');
+// Students' phones must reach this URL. Automatically uses Vercel URL in production.
+const publicUrl = () => {
+  if (process.env.PUBLIC_URL) return process.env.PUBLIC_URL.replace(/\/+$/, '');
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  return `http://${lanAddress()}:${PORT}`;
+};
 
 const isOpen = (s, now = Date.now()) => !s.endedAt && now < s.expiresAt;
 
@@ -103,6 +112,7 @@ function resolveSession(req, res) {
 
 /** Professor-only endpoints: reachable from this machine (dashboard + Chrome extension), not from student phones. */
 function localOnly(req, res, next) {
+  if (process.env.VERCEL) return next();
   const addr = req.socket.remoteAddress || '';
   const loopback = ['::1', '127.0.0.1', '::ffff:127.0.0.1'].includes(addr);
   if (!loopback && !REMOTE_PROFESSOR) {

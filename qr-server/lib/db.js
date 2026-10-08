@@ -35,6 +35,7 @@ const AttendanceSchema = new mongoose.Schema({
 const AttendanceRecord = mongoose.model('AttendanceRecord', AttendanceSchema);
 
 let isConnected = false;
+let cachedPromise = null;
 
 async function connectDB() {
   const uri = process.env.MONGODB_URI;
@@ -42,22 +43,26 @@ async function connectDB() {
     console.warn('[MongoDB] MONGODB_URI not defined in environment. Cloud sync disabled.');
     return false;
   }
-  try {
-    if (mongoose.connection.readyState === 1) {
-      isConnected = true;
-      return true;
-    }
-    await mongoose.connect(uri, {
-      serverSelectionTimeoutMS: 5000
-    });
+  if (mongoose.connection.readyState === 1) {
+    isConnected = true;
+    return true;
+  }
+  if (cachedPromise) {
+    return cachedPromise;
+  }
+  cachedPromise = mongoose.connect(uri, {
+    serverSelectionTimeoutMS: 5000
+  }).then(() => {
     isConnected = true;
     console.log('[MongoDB] Connected successfully to Atlas cluster!');
     return true;
-  } catch (err) {
-    console.error('[MongoDB] Connection error:', err.message);
+  }).catch((err) => {
+    cachedPromise = null;
     isConnected = false;
+    console.error('[MongoDB] Connection error:', err.message);
     return false;
-  }
+  });
+  return cachedPromise;
 }
 
 async function saveSessionToCloud(session) {

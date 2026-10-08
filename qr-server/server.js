@@ -101,8 +101,8 @@ function absentList(session) {
   return session.roster.filter((s) => !session.marked[s.prn]);
 }
 
-function resolveSession(req, res) {
-  const session = req.params.id === 'latest' ? store.latest() : store.get(req.params.id);
+async function resolveSession(req, res) {
+  const session = req.params.id === 'latest' ? await store.latest() : await store.get(req.params.id);
   if (!session) {
     res.status(404).json({ error: 'Session not found' });
     return null;
@@ -218,7 +218,8 @@ app.get('/s/:id', (_req, res) => res.sendFile(path.join(__dirname, 'public', 'st
 // ---------------------------------------------------------------- public display API (for classroom screen)
 
 app.get('/api/display/live', async (_req, res) => {
-  const session = store.list().find((s) => isOpen(s)) || store.latest();
+  const list = await store.list();
+  const session = list.find((s) => isOpen(s)) || (await store.latest());
   if (!session) {
     return res.json({ hasSession: false, open: false });
   }
@@ -258,12 +259,13 @@ app.get('/api/connection', localOrKey, (_req, res) => {
   res.json({ serverUrl: publicUrl(), key: PROFESSOR_KEY });
 });
 
-app.post('/api/sessions', localOrKey, (req, res) => {
+app.post('/api/sessions', localOrKey, async (req, res) => {
   const className = String(req.body.className || '').trim().slice(0, 60);
   const subject = String(req.body.subject || '').trim().slice(0, 60);
   const minutes = Math.min(MAX_DURATION_MIN, Math.max(MIN_DURATION_MIN, Number(req.body.durationMinutes) || 2));
 
-  if (store.list().some((s) => isOpen(s))) {
+  const list = await store.list();
+  if (list.some((s) => isOpen(s))) {
     return res.status(409).json({ error: 'A session is already open. End it before starting a new one.' });
   }
 
@@ -275,7 +277,7 @@ app.post('/api/sessions', localOrKey, (req, res) => {
   }
 
   const now = Date.now();
-  const session = store.create({
+  const session = await store.create({
     id: crypto.randomBytes(3).toString('hex').toUpperCase(), // short code, e.g. "A3F9C2"
     secret: crypto.randomBytes(24).toString('hex'),
     className,
@@ -289,28 +291,29 @@ app.post('/api/sessions', localOrKey, (req, res) => {
   res.status(201).json({ id: session.id });
 });
 
-app.get('/api/sessions', localOrKey, (_req, res) => {
+app.get('/api/sessions', localOrKey, async (_req, res) => {
+  const list = await store.list();
   res.json(
-    store.list().map((s) => ({
+    list.map((s) => ({
       id: s.id,
       className: s.className,
       subject: s.subject,
       createdAt: s.createdAt,
       open: isOpen(s),
-      presentCount: Object.keys(s.marked).length,
-      total: s.roster.length,
+      presentCount: Object.keys(s.marked || {}).length,
+      total: (s.roster || []).length,
     }))
   );
 });
 
 app.get('/api/sessions/:id', localOrKey, async (req, res) => {
-  const session = resolveSession(req, res);
+  const session = await resolveSession(req, res);
   if (!session) return;
   const now = Date.now();
   const open = isOpen(session, now);
 
-  const nameOf = new Map(session.roster.map((s) => [s.prn, s.name]));
-  const recent = Object.entries(session.marked)
+  const nameOf = new Map((session.roster || []).map((s) => [s.prn, s.name]));
+  const recent = Object.entries(session.marked || {})
     .sort((a, b) => b[1].at - a[1].at)
     .slice(0, 15)
     .map(([prn, m]) => ({ prn, name: nameOf.get(prn) || '', at: m.at }));
@@ -321,8 +324,8 @@ app.get('/api/sessions/:id', localOrKey, async (req, res) => {
     subject: session.subject,
     open,
     remainingSec: open ? Math.max(0, Math.round((session.expiresAt - now) / 1000)) : 0,
-    presentCount: Object.keys(session.marked).length,
-    total: session.roster.length,
+    presentCount: Object.keys(session.marked || {}).length,
+    total: (session.roster || []).length,
     recent,
   };
   if (open) {
@@ -334,11 +337,11 @@ app.get('/api/sessions/:id', localOrKey, async (req, res) => {
 });
 
 app.post('/api/sessions/:id/end', localOrKey, async (req, res) => {
-  const session = resolveSession(req, res);
+  const session = await resolveSession(req, res);
   if (!session) return;
   if (!session.endedAt) {
     session.endedAt = Math.min(Date.now(), session.expiresAt);
-    store.save();
+    await store.save(session);
     // Auto-save to MongoDB Atlas on session completion
     db.saveSessionToCloud(session).catch((err) => console.warn('[MongoDB] Auto-save error:', err.message));
   }
@@ -347,7 +350,7 @@ app.post('/api/sessions/:id/end', localOrKey, async (req, res) => {
 
 // Explicit endpoint to sync a session to MongoDB Cloud from dashboard
 app.post('/api/sessions/:id/sync-cloud', localOrKey, async (req, res) => {
-  const session = resolveSession(req, res);
+  const session = await resolveSession(req, res);
   if (!session) return;
   const result = await db.saveSessionToCloud(session);
   if (!result.ok) return res.status(500).json({ error: result.error });
@@ -355,8 +358,8 @@ app.post('/api/sessions/:id/sync-cloud', localOrKey, async (req, res) => {
 });
 
 // Used by the Chrome extension ("latest" is accepted as an id).
-app.get('/api/sessions/:id/absent', localOrKey, (req, res) => {
-  const session = resolveSession(req, res);
+app.get('/api/sessions/:id/absent', localOrKey, async (req, res) => {
+  const session = await resolveSession(req, res);
   if (!session) return;
   res.json({
     id: session.id,
@@ -365,18 +368,20 @@ app.get('/api/sessions/:id/absent', localOrKey, (req, res) => {
     open: isOpen(session),
     // When the attendance window closed (manual end or timeout); null while still open.
     closedAt: session.endedAt || (Date.now() >= session.expiresAt ? session.expiresAt : null),
-    total: session.roster.length,
-    presentCount: Object.keys(session.marked).length,
+    total: (session.roster || []).length,
+    presentCount: Object.keys(session.marked || {}).length,
     absent: absentList(session),
   });
 });
 
 // Download absent_students.csv AND automatically save to MongoDB cloud
 app.get('/api/sessions/:id/absent.csv', localOrKey, async (req, res) => {
-  const session = resolveSession(req, res);
+  const session = await resolveSession(req, res);
   if (!session) return;
   const csv = toAbsentCsv(absentList(session));
-  fs.writeFileSync(path.join(EXPORT_DIR, `absent_students_${session.id}.csv`), csv);
+  try {
+    fs.writeFileSync(path.join(EXPORT_DIR, `absent_students_${session.id}.csv`), csv);
+  } catch {}
 
   // Sync to MongoDB Atlas on download
   try {
@@ -447,18 +452,18 @@ app.post('/api/cloud/sessions/:id/synced', async (req, res) => {
 
 // ---------------------------------------------------------------- student API (public on the LAN)
 
-app.get('/api/student/session/:id', (req, res) => {
-  const session = store.get(req.params.id);
+app.get('/api/student/session/:id', async (req, res) => {
+  const session = await store.get(req.params.id);
   if (!session) return res.status(404).json({ error: 'Session not found' });
   res.json({ className: session.className, subject: session.subject, open: isOpen(session) });
 });
 
-app.post('/api/mark', rateLimit, (req, res) => {
+app.post('/api/mark', rateLimit, async (req, res) => {
   const { sessionId, token } = req.body;
   const prn = String(req.body.prn || '').trim();
   const deviceId = String(req.body.deviceId || '').slice(0, 64);
 
-  const session = store.get(String(sessionId || ''));
+  const session = await store.get(String(sessionId || ''));
   if (!session) return res.status(404).json({ error: 'Session not found.' });
   if (!isOpen(session)) return res.status(403).json({ error: 'Attendance window is closed.' });
   if (!isValidToken(session, token)) {
@@ -468,7 +473,7 @@ app.post('/api/mark', rateLimit, (req, res) => {
     return res.status(400).json({ error: 'Enter a valid PRN.' });
   }
 
-  const student = session.roster.find((s) => s.prn === prn);
+  const student = (session.roster || []).find((s) => s.prn === prn);
   if (!student) return res.status(404).json({ error: 'PRN not found in the class list.' });
 
   // The network address is what the server sees directly. Unlike the deviceId (browser storage), it is NOT
@@ -476,6 +481,7 @@ app.post('/api/mark', rateLimit, (req, res) => {
   const ip = clientIp(req);
   const lockByIp = IP_LOCK && !isLoopbackIp(ip);
 
+  session.marked = session.marked || {};
   const existing = session.marked[prn];
   if (existing) {
     // Same person retrying (same browser, or same phone via another tab/incognito): harmless.
@@ -497,7 +503,7 @@ app.post('/api/mark', rateLimit, (req, res) => {
   }
 
   session.marked[prn] = { at: Date.now(), deviceId, ip };
-  store.save();
+  await store.save(session);
   res.json({ ok: true, name: student.name, subject: session.subject });
 });
 

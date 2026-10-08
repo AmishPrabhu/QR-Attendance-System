@@ -1,6 +1,6 @@
 // Phase 2: QR attendance server (qr-server/). Used until the professor saves a different address
 // in the panel's "Server settings" (needed when the server runs on the class-screen PC).
-const DEFAULT_SERVER_URL = 'http://localhost:3001';
+const DEFAULT_SERVER_URL = 'https://qr-attendance-system-eosin-nu.vercel.app';
 
 // --- UI INJECTION LOGIC ---
 function injectUI() {
@@ -23,7 +23,7 @@ function injectUI() {
     <h3 style="margin: 0 0 10px 0; font-size: 14px; color: #333;">🤖 ERP Attendance Automator</h3>
     <details style="margin-bottom:8px; font-size:12px;">
       <summary style="cursor:pointer; color:#2563eb;">Server settings</summary>
-      <input type="text" id="erp-server-url" placeholder="http://192.168.1.20:3001" style="width:100%; margin-top:6px; font-size:12px; padding:4px; box-sizing:border-box;" />
+      <input type="text" id="erp-server-url" placeholder="https://qr-attendance-system-eosin-nu.vercel.app" style="width:100%; margin-top:6px; font-size:12px; padding:4px; box-sizing:border-box;" />
       <input type="password" id="erp-server-key" placeholder="Professor key" style="width:100%; margin-top:4px; font-size:12px; padding:4px; box-sizing:border-box;" />
       <button id="erp-server-save" style="width:100%; margin-top:4px; padding:5px; font-size:12px; cursor:pointer;">Save</button>
     </details>

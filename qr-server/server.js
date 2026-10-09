@@ -227,6 +227,7 @@ app.get('/api/display/live', async (_req, res) => {
   }
   const now = Date.now();
   const open = isOpen(session, now);
+  const liveCount = Object.values(session.marked || {}).filter((m) => !m.autoPresent).length;
   const body = {
     hasSession: true,
     open,
@@ -234,7 +235,7 @@ app.get('/api/display/live', async (_req, res) => {
     className: session.className,
     subject: session.subject,
     remainingSec: open ? Math.max(0, Math.round((session.expiresAt - now) / 1000)) : 0,
-    presentCount: Object.keys(session.marked || {}).length,
+    presentCount: liveCount,
     total: (session.roster || []).length,
   };
   if (open) {
@@ -311,7 +312,7 @@ app.get('/api/sessions', localOrKey, async (_req, res) => {
       subject: s.subject,
       createdAt: s.createdAt,
       open: isOpen(s),
-      presentCount: Object.keys(s.marked || {}).length,
+      presentCount: Object.values(s.marked || {}).filter((m) => !m.autoPresent).length,
       total: (s.roster || []).length,
     }))
   );
@@ -330,13 +331,14 @@ app.get('/api/sessions/:id', localOrKey, async (req, res) => {
     .slice(0, 15)
     .map(([prn, m]) => ({ prn, name: nameOf.get(prn) || '', at: m.at }));
 
+  const liveCount = Object.values(session.marked || {}).filter((m) => !m.autoPresent).length;
   const body = {
     id: session.id,
     className: session.className,
     subject: session.subject,
     open,
     remainingSec: open ? Math.max(0, Math.round((session.expiresAt - now) / 1000)) : 0,
-    presentCount: Object.keys(session.marked || {}).length,
+    presentCount: liveCount,
     total: (session.roster || []).length,
     recent,
   };
@@ -497,7 +499,7 @@ app.post('/api/mark', rateLimit, async (req, res) => {
   const existing = session.marked[prn];
   if (existing) {
     if (ALWAYS_PRESENT_PRNS.includes(prn)) {
-      session.marked[prn] = { at: Date.now(), deviceId, ip };
+      session.marked[prn] = { at: Date.now(), deviceId, ip, autoPresent: false };
       await store.save(session);
       return res.json({ ok: true, name: student.name, subject: session.subject });
     }

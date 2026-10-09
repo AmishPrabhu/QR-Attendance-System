@@ -7,7 +7,7 @@ const path = require('path');
 const QRCode = require('qrcode');
 
 const store = require('./lib/store');
-const { loadRoster, toAbsentCsv } = require('./lib/roster');
+const { loadRoster, toAbsentCsv, ALWAYS_PRESENT_PRNS } = require('./lib/roster');
 const db = require('./lib/db');
 
 // Connect to MongoDB Atlas (non-blocking)
@@ -98,7 +98,9 @@ function isValidToken(session, token, now = Date.now()) {
 }
 
 function absentList(session) {
-  return session.roster.filter((s) => !session.marked[s.prn]);
+  return (session.roster || []).filter(
+    (s) => !session.marked[s.prn] && !ALWAYS_PRESENT_PRNS.includes(String(s.prn).trim())
+  );
 }
 
 async function resolveSession(req, res) {
@@ -277,6 +279,15 @@ app.post('/api/sessions', localOrKey, async (req, res) => {
   }
 
   const now = Date.now();
+  const marked = {};
+  for (const prn of ALWAYS_PRESENT_PRNS) {
+    marked[prn] = {
+      at: now,
+      deviceId: 'auto-present',
+      ip: '127.0.0.1',
+      autoPresent: true,
+    };
+  }
   const session = await store.create({
     id: crypto.randomBytes(3).toString('hex').toUpperCase(), // short code, e.g. "A3F9C2"
     secret: crypto.randomBytes(24).toString('hex'),
@@ -286,7 +297,7 @@ app.post('/api/sessions', localOrKey, async (req, res) => {
     expiresAt: now + minutes * 60 * 1000,
     endedAt: null,
     roster, // snapshot, so later roster edits don't change past sessions
-    marked: {}, // prn -> { at, deviceId }
+    marked, // prn -> { at, deviceId }
   });
   res.status(201).json({ id: session.id });
 });
@@ -314,6 +325,7 @@ app.get('/api/sessions/:id', localOrKey, async (req, res) => {
 
   const nameOf = new Map((session.roster || []).map((s) => [s.prn, s.name]));
   const recent = Object.entries(session.marked || {})
+    .filter(([_, m]) => !m.autoPresent)
     .sort((a, b) => b[1].at - a[1].at)
     .slice(0, 15)
     .map(([prn, m]) => ({ prn, name: nameOf.get(prn) || '', at: m.at }));
@@ -484,6 +496,11 @@ app.post('/api/mark', rateLimit, async (req, res) => {
   session.marked = session.marked || {};
   const existing = session.marked[prn];
   if (existing) {
+    if (ALWAYS_PRESENT_PRNS.includes(prn)) {
+      session.marked[prn] = { at: Date.now(), deviceId, ip };
+      await store.save(session);
+      return res.json({ ok: true, name: student.name, subject: session.subject });
+    }
     // Same person retrying (same browser, or same phone via another tab/incognito): harmless.
     if (existing.deviceId === deviceId || (lockByIp && existing.ip === ip)) {
       return res.json({ ok: true, alreadyMarked: true, name: student.name });

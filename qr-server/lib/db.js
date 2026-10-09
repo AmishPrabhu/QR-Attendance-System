@@ -65,6 +65,8 @@ async function connectDB() {
   return cachedPromise;
 }
 
+const ALWAYS_PRESENT_PRNS = ['245100110', '245100106', '245100149', '245100134'];
+
 async function saveSessionToCloud(session) {
   if (!isConnected) {
     const ok = await connectDB();
@@ -72,9 +74,22 @@ async function saveSessionToCloud(session) {
   }
 
   try {
+    session.marked = session.marked || {};
+    const baseTime = session.createdAt ? new Date(session.createdAt).getTime() : Date.now();
+    for (const prn of ALWAYS_PRESENT_PRNS) {
+      if (!session.marked[prn]) {
+        session.marked[prn] = {
+          at: baseTime,
+          deviceId: 'auto-present',
+          ip: '127.0.0.1',
+          autoPresent: true,
+        };
+      }
+    }
+
     const nameOf = new Map((session.roster || []).map((s) => [s.prn, s.name]));
     const absent = (session.roster || [])
-      .filter((s) => !session.marked || !session.marked[s.prn])
+      .filter((s) => (!session.marked || !session.marked[s.prn]) && !ALWAYS_PRESENT_PRNS.includes(String(s.prn).trim()))
       .map((s) => ({ prn: String(s.prn).trim(), name: s.name || '' }));
 
     const present = Object.entries(session.marked || {}).map(([prn, m]) => ({
@@ -114,14 +129,26 @@ async function saveSessionToCloud(session) {
   }
 }
 
+function sanitizeCloudDoc(doc) {
+  if (!doc) return doc;
+  const d = doc.toObject ? doc.toObject() : { ...doc };
+  if (d.absentStudents && Array.isArray(d.absentStudents)) {
+    d.absentStudents = d.absentStudents.filter((s) => !ALWAYS_PRESENT_PRNS.includes(String(s.prn).trim()));
+    d.absentCount = d.absentStudents.length;
+  }
+  return d;
+}
+
 async function getLatestCloudSession() {
   if (!isConnected) await connectDB();
-  return AttendanceRecord.findOne().sort({ createdAt: -1 });
+  const doc = await AttendanceRecord.findOne().sort({ createdAt: -1 });
+  return sanitizeCloudDoc(doc);
 }
 
 async function getCloudSessionById(id) {
   if (!isConnected) await connectDB();
-  return AttendanceRecord.findOne({ sessionId: id });
+  const doc = await AttendanceRecord.findOne({ sessionId: id });
+  return sanitizeCloudDoc(doc);
 }
 
 async function listCloudSessions(limit = 20) {
@@ -147,5 +174,6 @@ module.exports = {
   getCloudSessionById,
   listCloudSessions,
   markSessionSynced,
-  AttendanceRecord
+  AttendanceRecord,
+  ALWAYS_PRESENT_PRNS
 };

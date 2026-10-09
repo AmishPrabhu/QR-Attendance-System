@@ -19,9 +19,11 @@
     }
     .status-present { color: green; background: #ecfdf5; border-color: #6ee7b7; }
     .status-absent { color: red; background: #fef2f2; border-color: #fca5a5; }
-    .actions { margin-top: 20px; display: flex; gap: 10px; }
+    .actions { margin-top: 20px; display: flex; gap: 10px; align-items: center; }
     .btn-save { background: #16a34a; color: white; border: none; padding: 9px 20px; font-weight: bold; border-radius: 4px; cursor: pointer; font-size: 13px; }
     .btn-save:hover { background: #15803d; }
+    .btn-quick { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; padding: 8px 14px; font-size: 12px; border-radius: 4px; cursor: pointer; }
+    .btn-quick:hover { background: #e2e8f0; }
   </style>
 </head>
 <body>
@@ -32,9 +34,22 @@
   </div>
 
   <div class="container">
-    <div class="info-bar">
-      <b>Class:</b> TY-CSE &nbsp;|&nbsp; <b>Course:</b> 7CS301 Compiler Construction &nbsp;|&nbsp; <b>Date:</b> <span id="currentDate"></span><br>
-      <span style="color:#059669; font-weight:bold;">💡 The Chrome Extension will detect this page automatically (looks for <code>td[id$="_tdRollNo"]</code>).</span>
+    <div class="info-bar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+      <div>
+        <b>Class:</b> TY-CSE &nbsp;|&nbsp; <b>Course:</b> 7CS301 Compiler Construction &nbsp;|&nbsp; <b>Date:</b> <span id="currentDate"></span><br>
+        <span style="color:#059669; font-weight:bold;">💡 The Chrome Extension will detect this page automatically (looks for <code>td[id$="_tdRollNo"]</code>).</span>
+      </div>
+      <div style="font-size:12px; font-weight:bold; background:#e0f2fe; color:#0369a1; padding:6px 12px; border-radius:4px; border:1px solid #bae6fd;">
+        Total: <span id="countTotal">0</span> &nbsp;|&nbsp; 
+        Present: <span id="countPresent" style="color:#16a34a;">0</span> &nbsp;|&nbsp; 
+        Absent: <span id="countAbsent" style="color:#dc2626;">0</span>
+      </div>
+    </div>
+
+    <div class="actions" style="margin-top: 10px; margin-bottom: 15px;">
+      <input class="btn-save" id="btnPopUpSave" name="btnPopUpSave" type="button" value="Update (Save Attendance)" onclick="alert('Mock ERP: Attendance updated successfully in database!')" />
+      <button type="button" class="btn-quick" onclick="setAll('PRESENT')">Reset All to Present</button>
+      <button type="button" class="btn-quick" onclick="setAll('ABSENT')">Mark All Absent</button>
     </div>
 
     <table id="tblStudentList">
@@ -59,7 +74,6 @@
             <input id="rptstudentlist_ctl00_hdnONE" type="hidden" value="PRESENT"/>
           </td>
         </tr>
-
         <!-- Student 2 -->
         <tr id="rptstudentlist_ctl01_trStudRow">
           <td align="center" id="rptstudentlist_ctl01_td1">2</td>
@@ -71,7 +85,6 @@
             <input id="rptstudentlist_ctl01_hdnONE" type="hidden" value="PRESENT"/>
           </td>
         </tr>
-
         <!-- Student 3 -->
         <tr id="rptstudentlist_ctl02_trStudRow">
           <td align="center" id="rptstudentlist_ctl02_td1">3</td>
@@ -83,7 +96,6 @@
             <input id="rptstudentlist_ctl02_hdnONE" type="hidden" value="PRESENT"/>
           </td>
         </tr>
-
         <!-- Student 4 -->
         <tr id="rptstudentlist_ctl03_trStudRow">
           <td align="center" id="rptstudentlist_ctl03_td1">4</td>
@@ -95,7 +107,6 @@
             <input id="rptstudentlist_ctl03_hdnONE" type="hidden" value="PRESENT"/>
           </td>
         </tr>
-
         <!-- Student 5 -->
         <tr id="rptstudentlist_ctl04_trStudRow">
           <td align="center" id="rptstudentlist_ctl04_td1">5</td>
@@ -107,7 +118,6 @@
             <input id="rptstudentlist_ctl04_hdnONE" type="hidden" value="PRESENT"/>
           </td>
         </tr>
-
         <!-- Student 6 -->
         <tr id="rptstudentlist_ctl05_trStudRow">
           <td align="center" id="rptstudentlist_ctl05_td1">6</td>
@@ -119,7 +129,6 @@
             <input id="rptstudentlist_ctl05_hdnONE" type="hidden" value="PRESENT"/>
           </td>
         </tr>
-
         <!-- Student 7 -->
         <tr id="rptstudentlist_ctl06_trStudRow">
           <td align="center" id="rptstudentlist_ctl06_td1">7</td>
@@ -131,7 +140,6 @@
             <input id="rptstudentlist_ctl06_hdnONE" type="hidden" value="PRESENT"/>
           </td>
         </tr>
-
         <!-- Student 8 -->
         <tr id="rptstudentlist_ctl07_trStudRow">
           <td align="center" id="rptstudentlist_ctl07_td1">8</td>
@@ -143,7 +151,6 @@
             <input id="rptstudentlist_ctl07_hdnONE" type="hidden" value="PRESENT"/>
           </td>
         </tr>
-
         <!-- Student 9 -->
         <tr id="rptstudentlist_ctl08_trStudRow">
           <td align="center" id="rptstudentlist_ctl08_td1">9</td>
@@ -155,7 +162,6 @@
             <input id="rptstudentlist_ctl08_hdnONE" type="hidden" value="PRESENT"/>
           </td>
         </tr>
-
         <!-- Student 10 -->
         <tr id="rptstudentlist_ctl09_trStudRow">
           <td align="center" id="rptstudentlist_ctl09_td1">10</td>
@@ -167,16 +173,1308 @@
             <input id="rptstudentlist_ctl09_hdnONE" type="hidden" value="PRESENT"/>
           </td>
         </tr>
+        <!-- Student 11 -->
+        <tr id="rptstudentlist_ctl10_trStudRow">
+          <td align="center" id="rptstudentlist_ctl10_td1">11</td>
+          <td id="rptstudentlist_ctl10_td7">245100011</td>
+          <td id="rptstudentlist_ctl10_tdstudentname">Ashish Jagdish Kamble</td>
+          <td id="rptstudentlist_ctl10_tdRollNo">245100011</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl10_spn1" onclick="toggleStatus('rptstudentlist_ctl10')">PRESENT</span>
+            <input id="rptstudentlist_ctl10_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 12 -->
+        <tr id="rptstudentlist_ctl11_trStudRow">
+          <td align="center" id="rptstudentlist_ctl11_td1">12</td>
+          <td id="rptstudentlist_ctl11_td7">245100012</td>
+          <td id="rptstudentlist_ctl11_tdstudentname">Subodhi Suresh Khandare</td>
+          <td id="rptstudentlist_ctl11_tdRollNo">245100012</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl11_spn1" onclick="toggleStatus('rptstudentlist_ctl11')">PRESENT</span>
+            <input id="rptstudentlist_ctl11_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 13 -->
+        <tr id="rptstudentlist_ctl12_trStudRow">
+          <td align="center" id="rptstudentlist_ctl12_td1">13</td>
+          <td id="rptstudentlist_ctl12_td7">245100013</td>
+          <td id="rptstudentlist_ctl12_tdstudentname">Maruti Sarjerao Gaikwad</td>
+          <td id="rptstudentlist_ctl12_tdRollNo">245100013</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl12_spn1" onclick="toggleStatus('rptstudentlist_ctl12')">PRESENT</span>
+            <input id="rptstudentlist_ctl12_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 14 -->
+        <tr id="rptstudentlist_ctl13_trStudRow">
+          <td align="center" id="rptstudentlist_ctl13_td1">14</td>
+          <td id="rptstudentlist_ctl13_td7">245100014</td>
+          <td id="rptstudentlist_ctl13_tdstudentname">Pranav Pradip Jadhav</td>
+          <td id="rptstudentlist_ctl13_tdRollNo">245100014</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl13_spn1" onclick="toggleStatus('rptstudentlist_ctl13')">PRESENT</span>
+            <input id="rptstudentlist_ctl13_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 15 -->
+        <tr id="rptstudentlist_ctl14_trStudRow">
+          <td align="center" id="rptstudentlist_ctl14_td1">15</td>
+          <td id="rptstudentlist_ctl14_td7">245100015</td>
+          <td id="rptstudentlist_ctl14_tdstudentname">Harsha Mendhe</td>
+          <td id="rptstudentlist_ctl14_tdRollNo">245100015</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl14_spn1" onclick="toggleStatus('rptstudentlist_ctl14')">PRESENT</span>
+            <input id="rptstudentlist_ctl14_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 16 -->
+        <tr id="rptstudentlist_ctl15_trStudRow">
+          <td align="center" id="rptstudentlist_ctl15_td1">16</td>
+          <td id="rptstudentlist_ctl15_td7">245100016</td>
+          <td id="rptstudentlist_ctl15_tdstudentname">Madhura Ratnadeep Bhaskare</td>
+          <td id="rptstudentlist_ctl15_tdRollNo">245100016</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl15_spn1" onclick="toggleStatus('rptstudentlist_ctl15')">PRESENT</span>
+            <input id="rptstudentlist_ctl15_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 17 -->
+        <tr id="rptstudentlist_ctl16_trStudRow">
+          <td align="center" id="rptstudentlist_ctl16_td1">17</td>
+          <td id="rptstudentlist_ctl16_td7">245100017</td>
+          <td id="rptstudentlist_ctl16_tdstudentname">Pranav Ravindra Salunkhe</td>
+          <td id="rptstudentlist_ctl16_tdRollNo">245100017</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl16_spn1" onclick="toggleStatus('rptstudentlist_ctl16')">PRESENT</span>
+            <input id="rptstudentlist_ctl16_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 18 -->
+        <tr id="rptstudentlist_ctl17_trStudRow">
+          <td align="center" id="rptstudentlist_ctl17_td1">18</td>
+          <td id="rptstudentlist_ctl17_td7">245100018</td>
+          <td id="rptstudentlist_ctl17_tdstudentname">Rohit Deepakrao Nimje</td>
+          <td id="rptstudentlist_ctl17_tdRollNo">245100018</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl17_spn1" onclick="toggleStatus('rptstudentlist_ctl17')">PRESENT</span>
+            <input id="rptstudentlist_ctl17_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 19 -->
+        <tr id="rptstudentlist_ctl18_trStudRow">
+          <td align="center" id="rptstudentlist_ctl18_td1">19</td>
+          <td id="rptstudentlist_ctl18_td7">245100019</td>
+          <td id="rptstudentlist_ctl18_tdstudentname">Prerana Amol Patil</td>
+          <td id="rptstudentlist_ctl18_tdRollNo">245100019</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl18_spn1" onclick="toggleStatus('rptstudentlist_ctl18')">PRESENT</span>
+            <input id="rptstudentlist_ctl18_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 20 -->
+        <tr id="rptstudentlist_ctl19_trStudRow">
+          <td align="center" id="rptstudentlist_ctl19_td1">20</td>
+          <td id="rptstudentlist_ctl19_td7">245100020</td>
+          <td id="rptstudentlist_ctl19_tdstudentname">Chetan Khadatare</td>
+          <td id="rptstudentlist_ctl19_tdRollNo">245100020</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl19_spn1" onclick="toggleStatus('rptstudentlist_ctl19')">PRESENT</span>
+            <input id="rptstudentlist_ctl19_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 21 -->
+        <tr id="rptstudentlist_ctl20_trStudRow">
+          <td align="center" id="rptstudentlist_ctl20_td1">21</td>
+          <td id="rptstudentlist_ctl20_td7">245100021</td>
+          <td id="rptstudentlist_ctl20_tdstudentname">Dhanashree Nagesh Nirmale</td>
+          <td id="rptstudentlist_ctl20_tdRollNo">245100021</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl20_spn1" onclick="toggleStatus('rptstudentlist_ctl20')">PRESENT</span>
+            <input id="rptstudentlist_ctl20_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 22 -->
+        <tr id="rptstudentlist_ctl21_trStudRow">
+          <td align="center" id="rptstudentlist_ctl21_td1">22</td>
+          <td id="rptstudentlist_ctl21_td7">245100022</td>
+          <td id="rptstudentlist_ctl21_tdstudentname">Gargi Ajit Salunkhe</td>
+          <td id="rptstudentlist_ctl21_tdRollNo">245100022</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl21_spn1" onclick="toggleStatus('rptstudentlist_ctl21')">PRESENT</span>
+            <input id="rptstudentlist_ctl21_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 23 -->
+        <tr id="rptstudentlist_ctl22_trStudRow">
+          <td align="center" id="rptstudentlist_ctl22_td1">23</td>
+          <td id="rptstudentlist_ctl22_td7">245100023</td>
+          <td id="rptstudentlist_ctl22_tdstudentname">Gauri Dattatray Dhole</td>
+          <td id="rptstudentlist_ctl22_tdRollNo">245100023</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl22_spn1" onclick="toggleStatus('rptstudentlist_ctl22')">PRESENT</span>
+            <input id="rptstudentlist_ctl22_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 24 -->
+        <tr id="rptstudentlist_ctl23_trStudRow">
+          <td align="center" id="rptstudentlist_ctl23_td1">24</td>
+          <td id="rptstudentlist_ctl23_td7">245100024</td>
+          <td id="rptstudentlist_ctl23_tdstudentname">ATHARV TANAJI CHOUGULE</td>
+          <td id="rptstudentlist_ctl23_tdRollNo">245100024</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl23_spn1" onclick="toggleStatus('rptstudentlist_ctl23')">PRESENT</span>
+            <input id="rptstudentlist_ctl23_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 25 -->
+        <tr id="rptstudentlist_ctl24_trStudRow">
+          <td align="center" id="rptstudentlist_ctl24_td1">25</td>
+          <td id="rptstudentlist_ctl24_td7">245100025</td>
+          <td id="rptstudentlist_ctl24_tdstudentname">Kuntal Madavi</td>
+          <td id="rptstudentlist_ctl24_tdRollNo">245100025</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl24_spn1" onclick="toggleStatus('rptstudentlist_ctl24')">PRESENT</span>
+            <input id="rptstudentlist_ctl24_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 26 -->
+        <tr id="rptstudentlist_ctl25_trStudRow">
+          <td align="center" id="rptstudentlist_ctl25_td1">26</td>
+          <td id="rptstudentlist_ctl25_td7">245100026</td>
+          <td id="rptstudentlist_ctl25_tdstudentname">Shreya Sunil thomake</td>
+          <td id="rptstudentlist_ctl25_tdRollNo">245100026</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl25_spn1" onclick="toggleStatus('rptstudentlist_ctl25')">PRESENT</span>
+            <input id="rptstudentlist_ctl25_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 27 -->
+        <tr id="rptstudentlist_ctl26_trStudRow">
+          <td align="center" id="rptstudentlist_ctl26_td1">27</td>
+          <td id="rptstudentlist_ctl26_td7">245100027</td>
+          <td id="rptstudentlist_ctl26_tdstudentname">Nupur Sameer Patwardhan</td>
+          <td id="rptstudentlist_ctl26_tdRollNo">245100027</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl26_spn1" onclick="toggleStatus('rptstudentlist_ctl26')">PRESENT</span>
+            <input id="rptstudentlist_ctl26_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 28 -->
+        <tr id="rptstudentlist_ctl27_trStudRow">
+          <td align="center" id="rptstudentlist_ctl27_td1">28</td>
+          <td id="rptstudentlist_ctl27_td7">245100028</td>
+          <td id="rptstudentlist_ctl27_tdstudentname">Rajveer Shankarrao Barge</td>
+          <td id="rptstudentlist_ctl27_tdRollNo">245100028</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl27_spn1" onclick="toggleStatus('rptstudentlist_ctl27')">PRESENT</span>
+            <input id="rptstudentlist_ctl27_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 29 -->
+        <tr id="rptstudentlist_ctl28_trStudRow">
+          <td align="center" id="rptstudentlist_ctl28_td1">29</td>
+          <td id="rptstudentlist_ctl28_td7">245100029</td>
+          <td id="rptstudentlist_ctl28_tdstudentname">Aditi Kharat</td>
+          <td id="rptstudentlist_ctl28_tdRollNo">245100029</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl28_spn1" onclick="toggleStatus('rptstudentlist_ctl28')">PRESENT</span>
+            <input id="rptstudentlist_ctl28_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 30 -->
+        <tr id="rptstudentlist_ctl29_trStudRow">
+          <td align="center" id="rptstudentlist_ctl29_td1">30</td>
+          <td id="rptstudentlist_ctl29_td7">245100030</td>
+          <td id="rptstudentlist_ctl29_tdstudentname">Akash Sharma</td>
+          <td id="rptstudentlist_ctl29_tdRollNo">245100030</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl29_spn1" onclick="toggleStatus('rptstudentlist_ctl29')">PRESENT</span>
+            <input id="rptstudentlist_ctl29_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 31 -->
+        <tr id="rptstudentlist_ctl30_trStudRow">
+          <td align="center" id="rptstudentlist_ctl30_td1">31</td>
+          <td id="rptstudentlist_ctl30_td7">245100031</td>
+          <td id="rptstudentlist_ctl30_tdstudentname">Tarun singh</td>
+          <td id="rptstudentlist_ctl30_tdRollNo">245100031</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl30_spn1" onclick="toggleStatus('rptstudentlist_ctl30')">PRESENT</span>
+            <input id="rptstudentlist_ctl30_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 32 -->
+        <tr id="rptstudentlist_ctl31_trStudRow">
+          <td align="center" id="rptstudentlist_ctl31_td1">32</td>
+          <td id="rptstudentlist_ctl31_td7">245100032</td>
+          <td id="rptstudentlist_ctl31_tdstudentname">Sania Parihar</td>
+          <td id="rptstudentlist_ctl31_tdRollNo">245100032</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl31_spn1" onclick="toggleStatus('rptstudentlist_ctl31')">PRESENT</span>
+            <input id="rptstudentlist_ctl31_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 33 -->
+        <tr id="rptstudentlist_ctl32_trStudRow">
+          <td align="center" id="rptstudentlist_ctl32_td1">33</td>
+          <td id="rptstudentlist_ctl32_td7">245100033</td>
+          <td id="rptstudentlist_ctl32_tdstudentname">vansh verma</td>
+          <td id="rptstudentlist_ctl32_tdRollNo">245100033</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl32_spn1" onclick="toggleStatus('rptstudentlist_ctl32')">PRESENT</span>
+            <input id="rptstudentlist_ctl32_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 34 -->
+        <tr id="rptstudentlist_ctl33_trStudRow">
+          <td align="center" id="rptstudentlist_ctl33_td1">34</td>
+          <td id="rptstudentlist_ctl33_td7">245100034</td>
+          <td id="rptstudentlist_ctl33_tdstudentname">Aryan Sandip Mohite</td>
+          <td id="rptstudentlist_ctl33_tdRollNo">245100034</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl33_spn1" onclick="toggleStatus('rptstudentlist_ctl33')">PRESENT</span>
+            <input id="rptstudentlist_ctl33_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 35 -->
+        <tr id="rptstudentlist_ctl34_trStudRow">
+          <td align="center" id="rptstudentlist_ctl34_td1">35</td>
+          <td id="rptstudentlist_ctl34_td7">245100036</td>
+          <td id="rptstudentlist_ctl34_tdstudentname">Yajat Patil</td>
+          <td id="rptstudentlist_ctl34_tdRollNo">245100036</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl34_spn1" onclick="toggleStatus('rptstudentlist_ctl34')">PRESENT</span>
+            <input id="rptstudentlist_ctl34_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 36 -->
+        <tr id="rptstudentlist_ctl35_trStudRow">
+          <td align="center" id="rptstudentlist_ctl35_td1">36</td>
+          <td id="rptstudentlist_ctl35_td7">245100038</td>
+          <td id="rptstudentlist_ctl35_tdstudentname">Pruthviraj Manik Patil</td>
+          <td id="rptstudentlist_ctl35_tdRollNo">245100038</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl35_spn1" onclick="toggleStatus('rptstudentlist_ctl35')">PRESENT</span>
+            <input id="rptstudentlist_ctl35_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 37 -->
+        <tr id="rptstudentlist_ctl36_trStudRow">
+          <td align="center" id="rptstudentlist_ctl36_td1">37</td>
+          <td id="rptstudentlist_ctl36_td7">245100039</td>
+          <td id="rptstudentlist_ctl36_tdstudentname">Aniket Suhas Jagtap</td>
+          <td id="rptstudentlist_ctl36_tdRollNo">245100039</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl36_spn1" onclick="toggleStatus('rptstudentlist_ctl36')">PRESENT</span>
+            <input id="rptstudentlist_ctl36_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 38 -->
+        <tr id="rptstudentlist_ctl37_trStudRow">
+          <td align="center" id="rptstudentlist_ctl37_td1">38</td>
+          <td id="rptstudentlist_ctl37_td7">245100040</td>
+          <td id="rptstudentlist_ctl37_tdstudentname">Vishvajit Shinde</td>
+          <td id="rptstudentlist_ctl37_tdRollNo">245100040</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl37_spn1" onclick="toggleStatus('rptstudentlist_ctl37')">PRESENT</span>
+            <input id="rptstudentlist_ctl37_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 39 -->
+        <tr id="rptstudentlist_ctl38_trStudRow">
+          <td align="center" id="rptstudentlist_ctl38_td1">39</td>
+          <td id="rptstudentlist_ctl38_td7">245100043</td>
+          <td id="rptstudentlist_ctl38_tdstudentname">Aditya Bharat Suryavanshi</td>
+          <td id="rptstudentlist_ctl38_tdRollNo">245100043</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl38_spn1" onclick="toggleStatus('rptstudentlist_ctl38')">PRESENT</span>
+            <input id="rptstudentlist_ctl38_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 40 -->
+        <tr id="rptstudentlist_ctl39_trStudRow">
+          <td align="center" id="rptstudentlist_ctl39_td1">40</td>
+          <td id="rptstudentlist_ctl39_td7">245100046</td>
+          <td id="rptstudentlist_ctl39_tdstudentname">Damini Ganesh Petikar</td>
+          <td id="rptstudentlist_ctl39_tdRollNo">245100046</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl39_spn1" onclick="toggleStatus('rptstudentlist_ctl39')">PRESENT</span>
+            <input id="rptstudentlist_ctl39_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 41 -->
+        <tr id="rptstudentlist_ctl40_trStudRow">
+          <td align="center" id="rptstudentlist_ctl40_td1">41</td>
+          <td id="rptstudentlist_ctl40_td7">245100047</td>
+          <td id="rptstudentlist_ctl40_tdstudentname">Gouri Chandrakant Shinagare</td>
+          <td id="rptstudentlist_ctl40_tdRollNo">245100047</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl40_spn1" onclick="toggleStatus('rptstudentlist_ctl40')">PRESENT</span>
+            <input id="rptstudentlist_ctl40_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 42 -->
+        <tr id="rptstudentlist_ctl41_trStudRow">
+          <td align="center" id="rptstudentlist_ctl41_td1">42</td>
+          <td id="rptstudentlist_ctl41_td7">245100048</td>
+          <td id="rptstudentlist_ctl41_tdstudentname">Aditya Ramchandra Hasabe</td>
+          <td id="rptstudentlist_ctl41_tdRollNo">245100048</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl41_spn1" onclick="toggleStatus('rptstudentlist_ctl41')">PRESENT</span>
+            <input id="rptstudentlist_ctl41_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 43 -->
+        <tr id="rptstudentlist_ctl42_trStudRow">
+          <td align="center" id="rptstudentlist_ctl42_td1">43</td>
+          <td id="rptstudentlist_ctl42_td7">245100053</td>
+          <td id="rptstudentlist_ctl42_tdstudentname">Tushar Gorakh Waghmare</td>
+          <td id="rptstudentlist_ctl42_tdRollNo">245100053</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl42_spn1" onclick="toggleStatus('rptstudentlist_ctl42')">PRESENT</span>
+            <input id="rptstudentlist_ctl42_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 44 -->
+        <tr id="rptstudentlist_ctl43_trStudRow">
+          <td align="center" id="rptstudentlist_ctl43_td1">44</td>
+          <td id="rptstudentlist_ctl43_td7">245100054</td>
+          <td id="rptstudentlist_ctl43_tdstudentname">Yogesh Raina</td>
+          <td id="rptstudentlist_ctl43_tdRollNo">245100054</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl43_spn1" onclick="toggleStatus('rptstudentlist_ctl43')">PRESENT</span>
+            <input id="rptstudentlist_ctl43_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 45 -->
+        <tr id="rptstudentlist_ctl44_trStudRow">
+          <td align="center" id="rptstudentlist_ctl44_td1">45</td>
+          <td id="rptstudentlist_ctl44_td7">245100055</td>
+          <td id="rptstudentlist_ctl44_tdstudentname">Kavya Ishwarkar</td>
+          <td id="rptstudentlist_ctl44_tdRollNo">245100055</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl44_spn1" onclick="toggleStatus('rptstudentlist_ctl44')">PRESENT</span>
+            <input id="rptstudentlist_ctl44_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 46 -->
+        <tr id="rptstudentlist_ctl45_trStudRow">
+          <td align="center" id="rptstudentlist_ctl45_td1">46</td>
+          <td id="rptstudentlist_ctl45_td7">245100056</td>
+          <td id="rptstudentlist_ctl45_tdstudentname">Krishna Arun Mali</td>
+          <td id="rptstudentlist_ctl45_tdRollNo">245100056</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl45_spn1" onclick="toggleStatus('rptstudentlist_ctl45')">PRESENT</span>
+            <input id="rptstudentlist_ctl45_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 47 -->
+        <tr id="rptstudentlist_ctl46_trStudRow">
+          <td align="center" id="rptstudentlist_ctl46_td1">47</td>
+          <td id="rptstudentlist_ctl46_td7">245100064</td>
+          <td id="rptstudentlist_ctl46_tdstudentname">Sarthak Bhau Choramale</td>
+          <td id="rptstudentlist_ctl46_tdRollNo">245100064</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl46_spn1" onclick="toggleStatus('rptstudentlist_ctl46')">PRESENT</span>
+            <input id="rptstudentlist_ctl46_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 48 -->
+        <tr id="rptstudentlist_ctl47_trStudRow">
+          <td align="center" id="rptstudentlist_ctl47_td1">48</td>
+          <td id="rptstudentlist_ctl47_td7">245100065</td>
+          <td id="rptstudentlist_ctl47_tdstudentname">Prasad Vyankati Sontakke</td>
+          <td id="rptstudentlist_ctl47_tdRollNo">245100065</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl47_spn1" onclick="toggleStatus('rptstudentlist_ctl47')">PRESENT</span>
+            <input id="rptstudentlist_ctl47_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 49 -->
+        <tr id="rptstudentlist_ctl48_trStudRow">
+          <td align="center" id="rptstudentlist_ctl48_td1">49</td>
+          <td id="rptstudentlist_ctl48_td7">245100067</td>
+          <td id="rptstudentlist_ctl48_tdstudentname">Riya Dey</td>
+          <td id="rptstudentlist_ctl48_tdRollNo">245100067</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl48_spn1" onclick="toggleStatus('rptstudentlist_ctl48')">PRESENT</span>
+            <input id="rptstudentlist_ctl48_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 50 -->
+        <tr id="rptstudentlist_ctl49_trStudRow">
+          <td align="center" id="rptstudentlist_ctl49_td1">50</td>
+          <td id="rptstudentlist_ctl49_td7">245100068</td>
+          <td id="rptstudentlist_ctl49_tdstudentname">Bhoite Tanuj Ravindra</td>
+          <td id="rptstudentlist_ctl49_tdRollNo">245100068</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl49_spn1" onclick="toggleStatus('rptstudentlist_ctl49')">PRESENT</span>
+            <input id="rptstudentlist_ctl49_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 51 -->
+        <tr id="rptstudentlist_ctl50_trStudRow">
+          <td align="center" id="rptstudentlist_ctl50_td1">51</td>
+          <td id="rptstudentlist_ctl50_td7">245100071</td>
+          <td id="rptstudentlist_ctl50_tdstudentname">Pranav Nimbalkar</td>
+          <td id="rptstudentlist_ctl50_tdRollNo">245100071</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl50_spn1" onclick="toggleStatus('rptstudentlist_ctl50')">PRESENT</span>
+            <input id="rptstudentlist_ctl50_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 52 -->
+        <tr id="rptstudentlist_ctl51_trStudRow">
+          <td align="center" id="rptstudentlist_ctl51_td1">52</td>
+          <td id="rptstudentlist_ctl51_td7">245100074</td>
+          <td id="rptstudentlist_ctl51_tdstudentname">Gayatri Suresh Nigade</td>
+          <td id="rptstudentlist_ctl51_tdRollNo">245100074</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl51_spn1" onclick="toggleStatus('rptstudentlist_ctl51')">PRESENT</span>
+            <input id="rptstudentlist_ctl51_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 53 -->
+        <tr id="rptstudentlist_ctl52_trStudRow">
+          <td align="center" id="rptstudentlist_ctl52_td1">53</td>
+          <td id="rptstudentlist_ctl52_td7">245100076</td>
+          <td id="rptstudentlist_ctl52_tdstudentname">Asharani Sargar</td>
+          <td id="rptstudentlist_ctl52_tdRollNo">245100076</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl52_spn1" onclick="toggleStatus('rptstudentlist_ctl52')">PRESENT</span>
+            <input id="rptstudentlist_ctl52_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 54 -->
+        <tr id="rptstudentlist_ctl53_trStudRow">
+          <td align="center" id="rptstudentlist_ctl53_td1">54</td>
+          <td id="rptstudentlist_ctl53_td7">245100078</td>
+          <td id="rptstudentlist_ctl53_tdstudentname">Nishant Nagnath Sonkamble</td>
+          <td id="rptstudentlist_ctl53_tdRollNo">245100078</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl53_spn1" onclick="toggleStatus('rptstudentlist_ctl53')">PRESENT</span>
+            <input id="rptstudentlist_ctl53_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 55 -->
+        <tr id="rptstudentlist_ctl54_trStudRow">
+          <td align="center" id="rptstudentlist_ctl54_td1">55</td>
+          <td id="rptstudentlist_ctl54_td7">245100082</td>
+          <td id="rptstudentlist_ctl54_tdstudentname">Vaishnavi Ramchandra Phatak</td>
+          <td id="rptstudentlist_ctl54_tdRollNo">245100082</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl54_spn1" onclick="toggleStatus('rptstudentlist_ctl54')">PRESENT</span>
+            <input id="rptstudentlist_ctl54_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 56 -->
+        <tr id="rptstudentlist_ctl55_trStudRow">
+          <td align="center" id="rptstudentlist_ctl55_td1">56</td>
+          <td id="rptstudentlist_ctl55_td7">245100083</td>
+          <td id="rptstudentlist_ctl55_tdstudentname">Aditya Pandurang Shewale</td>
+          <td id="rptstudentlist_ctl55_tdRollNo">245100083</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl55_spn1" onclick="toggleStatus('rptstudentlist_ctl55')">PRESENT</span>
+            <input id="rptstudentlist_ctl55_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 57 -->
+        <tr id="rptstudentlist_ctl56_trStudRow">
+          <td align="center" id="rptstudentlist_ctl56_td1">57</td>
+          <td id="rptstudentlist_ctl56_td7">245100090</td>
+          <td id="rptstudentlist_ctl56_tdstudentname">Sanjana Gokul Yedulwar</td>
+          <td id="rptstudentlist_ctl56_tdRollNo">245100090</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl56_spn1" onclick="toggleStatus('rptstudentlist_ctl56')">PRESENT</span>
+            <input id="rptstudentlist_ctl56_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 58 -->
+        <tr id="rptstudentlist_ctl57_trStudRow">
+          <td align="center" id="rptstudentlist_ctl57_td1">58</td>
+          <td id="rptstudentlist_ctl57_td7">245100091</td>
+          <td id="rptstudentlist_ctl57_tdstudentname">Krushnai Thakare</td>
+          <td id="rptstudentlist_ctl57_tdRollNo">245100091</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl57_spn1" onclick="toggleStatus('rptstudentlist_ctl57')">PRESENT</span>
+            <input id="rptstudentlist_ctl57_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 59 -->
+        <tr id="rptstudentlist_ctl58_trStudRow">
+          <td align="center" id="rptstudentlist_ctl58_td1">59</td>
+          <td id="rptstudentlist_ctl58_td7">245100092</td>
+          <td id="rptstudentlist_ctl58_tdstudentname">Pramod Eknath Jadhav</td>
+          <td id="rptstudentlist_ctl58_tdRollNo">245100092</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl58_spn1" onclick="toggleStatus('rptstudentlist_ctl58')">PRESENT</span>
+            <input id="rptstudentlist_ctl58_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 60 -->
+        <tr id="rptstudentlist_ctl59_trStudRow">
+          <td align="center" id="rptstudentlist_ctl59_td1">60</td>
+          <td id="rptstudentlist_ctl59_td7">245100097</td>
+          <td id="rptstudentlist_ctl59_tdstudentname">Prathamesh Padmakar Gambhirrao</td>
+          <td id="rptstudentlist_ctl59_tdRollNo">245100097</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl59_spn1" onclick="toggleStatus('rptstudentlist_ctl59')">PRESENT</span>
+            <input id="rptstudentlist_ctl59_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 61 -->
+        <tr id="rptstudentlist_ctl60_trStudRow">
+          <td align="center" id="rptstudentlist_ctl60_td1">61</td>
+          <td id="rptstudentlist_ctl60_td7">245100098</td>
+          <td id="rptstudentlist_ctl60_tdstudentname">Kartikey Kumar Singh</td>
+          <td id="rptstudentlist_ctl60_tdRollNo">245100098</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl60_spn1" onclick="toggleStatus('rptstudentlist_ctl60')">PRESENT</span>
+            <input id="rptstudentlist_ctl60_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 62 -->
+        <tr id="rptstudentlist_ctl61_trStudRow">
+          <td align="center" id="rptstudentlist_ctl61_td1">62</td>
+          <td id="rptstudentlist_ctl61_td7">245100103</td>
+          <td id="rptstudentlist_ctl61_tdstudentname">Om Vijay Kulkarni</td>
+          <td id="rptstudentlist_ctl61_tdRollNo">245100103</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl61_spn1" onclick="toggleStatus('rptstudentlist_ctl61')">PRESENT</span>
+            <input id="rptstudentlist_ctl61_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 63 -->
+        <tr id="rptstudentlist_ctl62_trStudRow">
+          <td align="center" id="rptstudentlist_ctl62_td1">63</td>
+          <td id="rptstudentlist_ctl62_td7">245100105</td>
+          <td id="rptstudentlist_ctl62_tdstudentname">Rihan Riyaj Chougule</td>
+          <td id="rptstudentlist_ctl62_tdRollNo">245100105</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl62_spn1" onclick="toggleStatus('rptstudentlist_ctl62')">PRESENT</span>
+            <input id="rptstudentlist_ctl62_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 64 -->
+        <tr id="rptstudentlist_ctl63_trStudRow">
+          <td align="center" id="rptstudentlist_ctl63_td1">64</td>
+          <td id="rptstudentlist_ctl63_td7">245100106</td>
+          <td id="rptstudentlist_ctl63_tdstudentname">Siddharth Shrimali</td>
+          <td id="rptstudentlist_ctl63_tdRollNo">245100106</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl63_spn1" onclick="toggleStatus('rptstudentlist_ctl63')">PRESENT</span>
+            <input id="rptstudentlist_ctl63_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 65 -->
+        <tr id="rptstudentlist_ctl64_trStudRow">
+          <td align="center" id="rptstudentlist_ctl64_td1">65</td>
+          <td id="rptstudentlist_ctl64_td7">245100110</td>
+          <td id="rptstudentlist_ctl64_tdstudentname">Amish Santosh Prabhu</td>
+          <td id="rptstudentlist_ctl64_tdRollNo">245100110</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl64_spn1" onclick="toggleStatus('rptstudentlist_ctl64')">PRESENT</span>
+            <input id="rptstudentlist_ctl64_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 66 -->
+        <tr id="rptstudentlist_ctl65_trStudRow">
+          <td align="center" id="rptstudentlist_ctl65_td1">66</td>
+          <td id="rptstudentlist_ctl65_td7">245100112</td>
+          <td id="rptstudentlist_ctl65_tdstudentname">Farhan Rizwan Shaikh</td>
+          <td id="rptstudentlist_ctl65_tdRollNo">245100112</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl65_spn1" onclick="toggleStatus('rptstudentlist_ctl65')">PRESENT</span>
+            <input id="rptstudentlist_ctl65_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 67 -->
+        <tr id="rptstudentlist_ctl66_trStudRow">
+          <td align="center" id="rptstudentlist_ctl66_td1">67</td>
+          <td id="rptstudentlist_ctl66_td7">245100114</td>
+          <td id="rptstudentlist_ctl66_tdstudentname">Pranav Shankar Misal</td>
+          <td id="rptstudentlist_ctl66_tdRollNo">245100114</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl66_spn1" onclick="toggleStatus('rptstudentlist_ctl66')">PRESENT</span>
+            <input id="rptstudentlist_ctl66_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 68 -->
+        <tr id="rptstudentlist_ctl67_trStudRow">
+          <td align="center" id="rptstudentlist_ctl67_td1">68</td>
+          <td id="rptstudentlist_ctl67_td7">245100117</td>
+          <td id="rptstudentlist_ctl67_tdstudentname">Varad Praphul Upadhye</td>
+          <td id="rptstudentlist_ctl67_tdRollNo">245100117</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl67_spn1" onclick="toggleStatus('rptstudentlist_ctl67')">PRESENT</span>
+            <input id="rptstudentlist_ctl67_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 69 -->
+        <tr id="rptstudentlist_ctl68_trStudRow">
+          <td align="center" id="rptstudentlist_ctl68_td1">69</td>
+          <td id="rptstudentlist_ctl68_td7">245100121</td>
+          <td id="rptstudentlist_ctl68_tdstudentname">Aryan Mukund Jadhav</td>
+          <td id="rptstudentlist_ctl68_tdRollNo">245100121</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl68_spn1" onclick="toggleStatus('rptstudentlist_ctl68')">PRESENT</span>
+            <input id="rptstudentlist_ctl68_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 70 -->
+        <tr id="rptstudentlist_ctl69_trStudRow">
+          <td align="center" id="rptstudentlist_ctl69_td1">70</td>
+          <td id="rptstudentlist_ctl69_td7">245100122</td>
+          <td id="rptstudentlist_ctl69_tdstudentname">Shruti Balasaheb Patil</td>
+          <td id="rptstudentlist_ctl69_tdRollNo">245100122</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl69_spn1" onclick="toggleStatus('rptstudentlist_ctl69')">PRESENT</span>
+            <input id="rptstudentlist_ctl69_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 71 -->
+        <tr id="rptstudentlist_ctl70_trStudRow">
+          <td align="center" id="rptstudentlist_ctl70_td1">71</td>
+          <td id="rptstudentlist_ctl70_td7">245100123</td>
+          <td id="rptstudentlist_ctl70_tdstudentname">Rathin Manoj Kamble</td>
+          <td id="rptstudentlist_ctl70_tdRollNo">245100123</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl70_spn1" onclick="toggleStatus('rptstudentlist_ctl70')">PRESENT</span>
+            <input id="rptstudentlist_ctl70_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 72 -->
+        <tr id="rptstudentlist_ctl71_trStudRow">
+          <td align="center" id="rptstudentlist_ctl71_td1">72</td>
+          <td id="rptstudentlist_ctl71_td7">245100125</td>
+          <td id="rptstudentlist_ctl71_tdstudentname">Soniya Nanwani</td>
+          <td id="rptstudentlist_ctl71_tdRollNo">245100125</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl71_spn1" onclick="toggleStatus('rptstudentlist_ctl71')">PRESENT</span>
+            <input id="rptstudentlist_ctl71_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 73 -->
+        <tr id="rptstudentlist_ctl72_trStudRow">
+          <td align="center" id="rptstudentlist_ctl72_td1">73</td>
+          <td id="rptstudentlist_ctl72_td7">245100131</td>
+          <td id="rptstudentlist_ctl72_tdstudentname">Saiprasad Chavan</td>
+          <td id="rptstudentlist_ctl72_tdRollNo">245100131</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl72_spn1" onclick="toggleStatus('rptstudentlist_ctl72')">PRESENT</span>
+            <input id="rptstudentlist_ctl72_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 74 -->
+        <tr id="rptstudentlist_ctl73_trStudRow">
+          <td align="center" id="rptstudentlist_ctl73_td1">74</td>
+          <td id="rptstudentlist_ctl73_td7">245100134</td>
+          <td id="rptstudentlist_ctl73_tdstudentname">Anushka Jain</td>
+          <td id="rptstudentlist_ctl73_tdRollNo">245100134</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl73_spn1" onclick="toggleStatus('rptstudentlist_ctl73')">PRESENT</span>
+            <input id="rptstudentlist_ctl73_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 75 -->
+        <tr id="rptstudentlist_ctl74_trStudRow">
+          <td align="center" id="rptstudentlist_ctl74_td1">75</td>
+          <td id="rptstudentlist_ctl74_td7">245100135</td>
+          <td id="rptstudentlist_ctl74_tdstudentname">Sushant Parshuram Koravi</td>
+          <td id="rptstudentlist_ctl74_tdRollNo">245100135</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl74_spn1" onclick="toggleStatus('rptstudentlist_ctl74')">PRESENT</span>
+            <input id="rptstudentlist_ctl74_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 76 -->
+        <tr id="rptstudentlist_ctl75_trStudRow">
+          <td align="center" id="rptstudentlist_ctl75_td1">76</td>
+          <td id="rptstudentlist_ctl75_td7">245100140</td>
+          <td id="rptstudentlist_ctl75_tdstudentname">Shreyas Anil Dimbar</td>
+          <td id="rptstudentlist_ctl75_tdRollNo">245100140</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl75_spn1" onclick="toggleStatus('rptstudentlist_ctl75')">PRESENT</span>
+            <input id="rptstudentlist_ctl75_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 77 -->
+        <tr id="rptstudentlist_ctl76_trStudRow">
+          <td align="center" id="rptstudentlist_ctl76_td1">77</td>
+          <td id="rptstudentlist_ctl76_td7">245100142</td>
+          <td id="rptstudentlist_ctl76_tdstudentname">Tushar Yashwant Deshmukh</td>
+          <td id="rptstudentlist_ctl76_tdRollNo">245100142</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl76_spn1" onclick="toggleStatus('rptstudentlist_ctl76')">PRESENT</span>
+            <input id="rptstudentlist_ctl76_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 78 -->
+        <tr id="rptstudentlist_ctl77_trStudRow">
+          <td align="center" id="rptstudentlist_ctl77_td1">78</td>
+          <td id="rptstudentlist_ctl77_td7">245100144</td>
+          <td id="rptstudentlist_ctl77_tdstudentname">Vaishnavi Fulchand Ghule</td>
+          <td id="rptstudentlist_ctl77_tdRollNo">245100144</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl77_spn1" onclick="toggleStatus('rptstudentlist_ctl77')">PRESENT</span>
+            <input id="rptstudentlist_ctl77_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 79 -->
+        <tr id="rptstudentlist_ctl78_trStudRow">
+          <td align="center" id="rptstudentlist_ctl78_td1">79</td>
+          <td id="rptstudentlist_ctl78_td7">245100145</td>
+          <td id="rptstudentlist_ctl78_tdstudentname">Sudesh Sambhaji Karande</td>
+          <td id="rptstudentlist_ctl78_tdRollNo">245100145</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl78_spn1" onclick="toggleStatus('rptstudentlist_ctl78')">PRESENT</span>
+            <input id="rptstudentlist_ctl78_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 80 -->
+        <tr id="rptstudentlist_ctl79_trStudRow">
+          <td align="center" id="rptstudentlist_ctl79_td1">80</td>
+          <td id="rptstudentlist_ctl79_td7">245100146</td>
+          <td id="rptstudentlist_ctl79_tdstudentname">Atharva Avinash Kulkarni</td>
+          <td id="rptstudentlist_ctl79_tdRollNo">245100146</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl79_spn1" onclick="toggleStatus('rptstudentlist_ctl79')">PRESENT</span>
+            <input id="rptstudentlist_ctl79_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 81 -->
+        <tr id="rptstudentlist_ctl80_trStudRow">
+          <td align="center" id="rptstudentlist_ctl80_td1">81</td>
+          <td id="rptstudentlist_ctl80_td7">245100149</td>
+          <td id="rptstudentlist_ctl80_tdstudentname">Yashraj Jadhav</td>
+          <td id="rptstudentlist_ctl80_tdRollNo">245100149</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl80_spn1" onclick="toggleStatus('rptstudentlist_ctl80')">PRESENT</span>
+            <input id="rptstudentlist_ctl80_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 82 -->
+        <tr id="rptstudentlist_ctl81_trStudRow">
+          <td align="center" id="rptstudentlist_ctl81_td1">82</td>
+          <td id="rptstudentlist_ctl81_td7">245100150</td>
+          <td id="rptstudentlist_ctl81_tdstudentname">Utkarsh Sood</td>
+          <td id="rptstudentlist_ctl81_tdRollNo">245100150</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl81_spn1" onclick="toggleStatus('rptstudentlist_ctl81')">PRESENT</span>
+            <input id="rptstudentlist_ctl81_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 83 -->
+        <tr id="rptstudentlist_ctl82_trStudRow">
+          <td align="center" id="rptstudentlist_ctl82_td1">83</td>
+          <td id="rptstudentlist_ctl82_td7">245100152</td>
+          <td id="rptstudentlist_ctl82_tdstudentname">Vedant Ashok Padwal</td>
+          <td id="rptstudentlist_ctl82_tdRollNo">245100152</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl82_spn1" onclick="toggleStatus('rptstudentlist_ctl82')">PRESENT</span>
+            <input id="rptstudentlist_ctl82_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 84 -->
+        <tr id="rptstudentlist_ctl83_trStudRow">
+          <td align="center" id="rptstudentlist_ctl83_td1">84</td>
+          <td id="rptstudentlist_ctl83_td7">245100154</td>
+          <td id="rptstudentlist_ctl83_tdstudentname">Harish P</td>
+          <td id="rptstudentlist_ctl83_tdRollNo">245100154</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl83_spn1" onclick="toggleStatus('rptstudentlist_ctl83')">PRESENT</span>
+            <input id="rptstudentlist_ctl83_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 85 -->
+        <tr id="rptstudentlist_ctl84_trStudRow">
+          <td align="center" id="rptstudentlist_ctl84_td1">85</td>
+          <td id="rptstudentlist_ctl84_td7">245100155</td>
+          <td id="rptstudentlist_ctl84_tdstudentname">Tejas Santosh Dhembe</td>
+          <td id="rptstudentlist_ctl84_tdRollNo">245100155</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl84_spn1" onclick="toggleStatus('rptstudentlist_ctl84')">PRESENT</span>
+            <input id="rptstudentlist_ctl84_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 86 -->
+        <tr id="rptstudentlist_ctl85_trStudRow">
+          <td align="center" id="rptstudentlist_ctl85_td1">86</td>
+          <td id="rptstudentlist_ctl85_td7">245100156</td>
+          <td id="rptstudentlist_ctl85_tdstudentname">Sanket Sainath Thorat</td>
+          <td id="rptstudentlist_ctl85_tdRollNo">245100156</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl85_spn1" onclick="toggleStatus('rptstudentlist_ctl85')">PRESENT</span>
+            <input id="rptstudentlist_ctl85_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 87 -->
+        <tr id="rptstudentlist_ctl86_trStudRow">
+          <td align="center" id="rptstudentlist_ctl86_td1">87</td>
+          <td id="rptstudentlist_ctl86_td7">245100158</td>
+          <td id="rptstudentlist_ctl86_tdstudentname">Raunak Rahangdale</td>
+          <td id="rptstudentlist_ctl86_tdRollNo">245100158</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl86_spn1" onclick="toggleStatus('rptstudentlist_ctl86')">PRESENT</span>
+            <input id="rptstudentlist_ctl86_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 88 -->
+        <tr id="rptstudentlist_ctl87_trStudRow">
+          <td align="center" id="rptstudentlist_ctl87_td1">88</td>
+          <td id="rptstudentlist_ctl87_td7">245100160</td>
+          <td id="rptstudentlist_ctl87_tdstudentname">Vedang Mandrupkar</td>
+          <td id="rptstudentlist_ctl87_tdRollNo">245100160</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl87_spn1" onclick="toggleStatus('rptstudentlist_ctl87')">PRESENT</span>
+            <input id="rptstudentlist_ctl87_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 89 -->
+        <tr id="rptstudentlist_ctl88_trStudRow">
+          <td align="center" id="rptstudentlist_ctl88_td1">89</td>
+          <td id="rptstudentlist_ctl88_td7">245100164</td>
+          <td id="rptstudentlist_ctl88_tdstudentname">Darshan Dipak Chavan</td>
+          <td id="rptstudentlist_ctl88_tdRollNo">245100164</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl88_spn1" onclick="toggleStatus('rptstudentlist_ctl88')">PRESENT</span>
+            <input id="rptstudentlist_ctl88_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 90 -->
+        <tr id="rptstudentlist_ctl89_trStudRow">
+          <td align="center" id="rptstudentlist_ctl89_td1">90</td>
+          <td id="rptstudentlist_ctl89_td7">245100171</td>
+          <td id="rptstudentlist_ctl89_tdstudentname">Darshan Bhagwan Wagh</td>
+          <td id="rptstudentlist_ctl89_tdRollNo">245100171</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl89_spn1" onclick="toggleStatus('rptstudentlist_ctl89')">PRESENT</span>
+            <input id="rptstudentlist_ctl89_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 91 -->
+        <tr id="rptstudentlist_ctl90_trStudRow">
+          <td align="center" id="rptstudentlist_ctl90_td1">91</td>
+          <td id="rptstudentlist_ctl90_td7">245100172</td>
+          <td id="rptstudentlist_ctl90_tdstudentname">Shravani Kale</td>
+          <td id="rptstudentlist_ctl90_tdRollNo">245100172</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl90_spn1" onclick="toggleStatus('rptstudentlist_ctl90')">PRESENT</span>
+            <input id="rptstudentlist_ctl90_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 92 -->
+        <tr id="rptstudentlist_ctl91_trStudRow">
+          <td align="center" id="rptstudentlist_ctl91_td1">92</td>
+          <td id="rptstudentlist_ctl91_td7">245100173</td>
+          <td id="rptstudentlist_ctl91_tdstudentname">Shreya Birajdar</td>
+          <td id="rptstudentlist_ctl91_tdRollNo">245100173</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl91_spn1" onclick="toggleStatus('rptstudentlist_ctl91')">PRESENT</span>
+            <input id="rptstudentlist_ctl91_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 93 -->
+        <tr id="rptstudentlist_ctl92_trStudRow">
+          <td align="center" id="rptstudentlist_ctl92_td1">93</td>
+          <td id="rptstudentlist_ctl92_td7">245100174</td>
+          <td id="rptstudentlist_ctl92_tdstudentname">Anmol Balkrushna Avhad</td>
+          <td id="rptstudentlist_ctl92_tdRollNo">245100174</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl92_spn1" onclick="toggleStatus('rptstudentlist_ctl92')">PRESENT</span>
+            <input id="rptstudentlist_ctl92_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 94 -->
+        <tr id="rptstudentlist_ctl93_trStudRow">
+          <td align="center" id="rptstudentlist_ctl93_td1">94</td>
+          <td id="rptstudentlist_ctl93_td7">245100180</td>
+          <td id="rptstudentlist_ctl93_tdstudentname">Ayush Badgujar</td>
+          <td id="rptstudentlist_ctl93_tdRollNo">245100180</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl93_spn1" onclick="toggleStatus('rptstudentlist_ctl93')">PRESENT</span>
+            <input id="rptstudentlist_ctl93_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 95 -->
+        <tr id="rptstudentlist_ctl94_trStudRow">
+          <td align="center" id="rptstudentlist_ctl94_td1">95</td>
+          <td id="rptstudentlist_ctl94_td7">245100185</td>
+          <td id="rptstudentlist_ctl94_tdstudentname">Mahi Ganesh Baghele</td>
+          <td id="rptstudentlist_ctl94_tdRollNo">245100185</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl94_spn1" onclick="toggleStatus('rptstudentlist_ctl94')">PRESENT</span>
+            <input id="rptstudentlist_ctl94_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 96 -->
+        <tr id="rptstudentlist_ctl95_trStudRow">
+          <td align="center" id="rptstudentlist_ctl95_td1">96</td>
+          <td id="rptstudentlist_ctl95_td7">245100186</td>
+          <td id="rptstudentlist_ctl95_tdstudentname">Sanika Vijay Ghatpanadi</td>
+          <td id="rptstudentlist_ctl95_tdRollNo">245100186</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl95_spn1" onclick="toggleStatus('rptstudentlist_ctl95')">PRESENT</span>
+            <input id="rptstudentlist_ctl95_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 97 -->
+        <tr id="rptstudentlist_ctl96_trStudRow">
+          <td align="center" id="rptstudentlist_ctl96_td1">97</td>
+          <td id="rptstudentlist_ctl96_td7">245100190</td>
+          <td id="rptstudentlist_ctl96_tdstudentname">Simran Sande</td>
+          <td id="rptstudentlist_ctl96_tdRollNo">245100190</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl96_spn1" onclick="toggleStatus('rptstudentlist_ctl96')">PRESENT</span>
+            <input id="rptstudentlist_ctl96_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 98 -->
+        <tr id="rptstudentlist_ctl97_trStudRow">
+          <td align="center" id="rptstudentlist_ctl97_td1">98</td>
+          <td id="rptstudentlist_ctl97_td7">245100191</td>
+          <td id="rptstudentlist_ctl97_tdstudentname">Sakshi Jayant Bhosale</td>
+          <td id="rptstudentlist_ctl97_tdRollNo">245100191</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl97_spn1" onclick="toggleStatus('rptstudentlist_ctl97')">PRESENT</span>
+            <input id="rptstudentlist_ctl97_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 99 -->
+        <tr id="rptstudentlist_ctl98_trStudRow">
+          <td align="center" id="rptstudentlist_ctl98_td1">99</td>
+          <td id="rptstudentlist_ctl98_td7">245100194</td>
+          <td id="rptstudentlist_ctl98_tdstudentname">Abhijeet Subhash Thorat</td>
+          <td id="rptstudentlist_ctl98_tdRollNo">245100194</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl98_spn1" onclick="toggleStatus('rptstudentlist_ctl98')">PRESENT</span>
+            <input id="rptstudentlist_ctl98_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 100 -->
+        <tr id="rptstudentlist_ctl99_trStudRow">
+          <td align="center" id="rptstudentlist_ctl99_td1">100</td>
+          <td id="rptstudentlist_ctl99_td7">245100198</td>
+          <td id="rptstudentlist_ctl99_tdstudentname">SWAYAM MANOJ SAHU</td>
+          <td id="rptstudentlist_ctl99_tdRollNo">245100198</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl99_spn1" onclick="toggleStatus('rptstudentlist_ctl99')">PRESENT</span>
+            <input id="rptstudentlist_ctl99_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 101 -->
+        <tr id="rptstudentlist_ctl100_trStudRow">
+          <td align="center" id="rptstudentlist_ctl100_td1">101</td>
+          <td id="rptstudentlist_ctl100_td7">245100199</td>
+          <td id="rptstudentlist_ctl100_tdstudentname">Rishi Ritesh Oswal</td>
+          <td id="rptstudentlist_ctl100_tdRollNo">245100199</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl100_spn1" onclick="toggleStatus('rptstudentlist_ctl100')">PRESENT</span>
+            <input id="rptstudentlist_ctl100_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 102 -->
+        <tr id="rptstudentlist_ctl101_trStudRow">
+          <td align="center" id="rptstudentlist_ctl101_td1">102</td>
+          <td id="rptstudentlist_ctl101_td7">245100207</td>
+          <td id="rptstudentlist_ctl101_tdstudentname">Rujal Shinde</td>
+          <td id="rptstudentlist_ctl101_tdRollNo">245100207</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl101_spn1" onclick="toggleStatus('rptstudentlist_ctl101')">PRESENT</span>
+            <input id="rptstudentlist_ctl101_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 103 -->
+        <tr id="rptstudentlist_ctl102_trStudRow">
+          <td align="center" id="rptstudentlist_ctl102_td1">103</td>
+          <td id="rptstudentlist_ctl102_td7">245100209</td>
+          <td id="rptstudentlist_ctl102_tdstudentname">Harsh Kale</td>
+          <td id="rptstudentlist_ctl102_tdRollNo">245100209</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl102_spn1" onclick="toggleStatus('rptstudentlist_ctl102')">PRESENT</span>
+            <input id="rptstudentlist_ctl102_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 104 -->
+        <tr id="rptstudentlist_ctl103_trStudRow">
+          <td align="center" id="rptstudentlist_ctl103_td1">104</td>
+          <td id="rptstudentlist_ctl103_td7">245100211</td>
+          <td id="rptstudentlist_ctl103_tdstudentname">Pranav Balasaheb Bobade</td>
+          <td id="rptstudentlist_ctl103_tdRollNo">245100211</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl103_spn1" onclick="toggleStatus('rptstudentlist_ctl103')">PRESENT</span>
+            <input id="rptstudentlist_ctl103_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 105 -->
+        <tr id="rptstudentlist_ctl104_trStudRow">
+          <td align="center" id="rptstudentlist_ctl104_td1">105</td>
+          <td id="rptstudentlist_ctl104_td7">245100212</td>
+          <td id="rptstudentlist_ctl104_tdstudentname">Ritesh Haridas Malgade</td>
+          <td id="rptstudentlist_ctl104_tdRollNo">245100212</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl104_spn1" onclick="toggleStatus('rptstudentlist_ctl104')">PRESENT</span>
+            <input id="rptstudentlist_ctl104_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 106 -->
+        <tr id="rptstudentlist_ctl105_trStudRow">
+          <td align="center" id="rptstudentlist_ctl105_td1">106</td>
+          <td id="rptstudentlist_ctl105_td7">245100213</td>
+          <td id="rptstudentlist_ctl105_tdstudentname">Vivek Yuvaraj Patil</td>
+          <td id="rptstudentlist_ctl105_tdRollNo">245100213</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl105_spn1" onclick="toggleStatus('rptstudentlist_ctl105')">PRESENT</span>
+            <input id="rptstudentlist_ctl105_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 107 -->
+        <tr id="rptstudentlist_ctl106_trStudRow">
+          <td align="center" id="rptstudentlist_ctl106_td1">107</td>
+          <td id="rptstudentlist_ctl106_td7">245100214</td>
+          <td id="rptstudentlist_ctl106_tdstudentname">Yashwant Sandeep Paraskar</td>
+          <td id="rptstudentlist_ctl106_tdRollNo">245100214</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl106_spn1" onclick="toggleStatus('rptstudentlist_ctl106')">PRESENT</span>
+            <input id="rptstudentlist_ctl106_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 108 -->
+        <tr id="rptstudentlist_ctl107_trStudRow">
+          <td align="center" id="rptstudentlist_ctl107_td1">108</td>
+          <td id="rptstudentlist_ctl107_td7">245100215</td>
+          <td id="rptstudentlist_ctl107_tdstudentname">Piyush Sanjay Fegade</td>
+          <td id="rptstudentlist_ctl107_tdRollNo">245100215</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl107_spn1" onclick="toggleStatus('rptstudentlist_ctl107')">PRESENT</span>
+            <input id="rptstudentlist_ctl107_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 109 -->
+        <tr id="rptstudentlist_ctl108_trStudRow">
+          <td align="center" id="rptstudentlist_ctl108_td1">109</td>
+          <td id="rptstudentlist_ctl108_td7">245100216</td>
+          <td id="rptstudentlist_ctl108_tdstudentname">Harsh patil</td>
+          <td id="rptstudentlist_ctl108_tdRollNo">245100216</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl108_spn1" onclick="toggleStatus('rptstudentlist_ctl108')">PRESENT</span>
+            <input id="rptstudentlist_ctl108_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 110 -->
+        <tr id="rptstudentlist_ctl109_trStudRow">
+          <td align="center" id="rptstudentlist_ctl109_td1">110</td>
+          <td id="rptstudentlist_ctl109_td7">245100217</td>
+          <td id="rptstudentlist_ctl109_tdstudentname">Harshal Pradip Kore</td>
+          <td id="rptstudentlist_ctl109_tdRollNo">245100217</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl109_spn1" onclick="toggleStatus('rptstudentlist_ctl109')">PRESENT</span>
+            <input id="rptstudentlist_ctl109_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 111 -->
+        <tr id="rptstudentlist_ctl110_trStudRow">
+          <td align="center" id="rptstudentlist_ctl110_td1">111</td>
+          <td id="rptstudentlist_ctl110_td7">245100218</td>
+          <td id="rptstudentlist_ctl110_tdstudentname">Sandesh Patil</td>
+          <td id="rptstudentlist_ctl110_tdRollNo">245100218</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl110_spn1" onclick="toggleStatus('rptstudentlist_ctl110')">PRESENT</span>
+            <input id="rptstudentlist_ctl110_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 112 -->
+        <tr id="rptstudentlist_ctl111_trStudRow">
+          <td align="center" id="rptstudentlist_ctl111_td1">112</td>
+          <td id="rptstudentlist_ctl111_td7">245100221</td>
+          <td id="rptstudentlist_ctl111_tdstudentname">Yash Fulkar</td>
+          <td id="rptstudentlist_ctl111_tdRollNo">245100221</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl111_spn1" onclick="toggleStatus('rptstudentlist_ctl111')">PRESENT</span>
+            <input id="rptstudentlist_ctl111_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 113 -->
+        <tr id="rptstudentlist_ctl112_trStudRow">
+          <td align="center" id="rptstudentlist_ctl112_td1">113</td>
+          <td id="rptstudentlist_ctl112_td7">245100222</td>
+          <td id="rptstudentlist_ctl112_tdstudentname">Rajwardhan Rajesh Rajwade</td>
+          <td id="rptstudentlist_ctl112_tdRollNo">245100222</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl112_spn1" onclick="toggleStatus('rptstudentlist_ctl112')">PRESENT</span>
+            <input id="rptstudentlist_ctl112_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 114 -->
+        <tr id="rptstudentlist_ctl113_trStudRow">
+          <td align="center" id="rptstudentlist_ctl113_td1">114</td>
+          <td id="rptstudentlist_ctl113_td7">245100223</td>
+          <td id="rptstudentlist_ctl113_tdstudentname">Samrudhi Kitturkar</td>
+          <td id="rptstudentlist_ctl113_tdRollNo">245100223</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl113_spn1" onclick="toggleStatus('rptstudentlist_ctl113')">PRESENT</span>
+            <input id="rptstudentlist_ctl113_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 115 -->
+        <tr id="rptstudentlist_ctl114_trStudRow">
+          <td align="center" id="rptstudentlist_ctl114_td1">115</td>
+          <td id="rptstudentlist_ctl114_td7">245100224</td>
+          <td id="rptstudentlist_ctl114_tdstudentname">Aditya Anil Dabhane</td>
+          <td id="rptstudentlist_ctl114_tdRollNo">245100224</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl114_spn1" onclick="toggleStatus('rptstudentlist_ctl114')">PRESENT</span>
+            <input id="rptstudentlist_ctl114_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 116 -->
+        <tr id="rptstudentlist_ctl115_trStudRow">
+          <td align="center" id="rptstudentlist_ctl115_td1">116</td>
+          <td id="rptstudentlist_ctl115_td7">255200001</td>
+          <td id="rptstudentlist_ctl115_tdstudentname">Ishwari Rajiv Nandargi</td>
+          <td id="rptstudentlist_ctl115_tdRollNo">255200001</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl115_spn1" onclick="toggleStatus('rptstudentlist_ctl115')">PRESENT</span>
+            <input id="rptstudentlist_ctl115_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 117 -->
+        <tr id="rptstudentlist_ctl116_trStudRow">
+          <td align="center" id="rptstudentlist_ctl116_td1">117</td>
+          <td id="rptstudentlist_ctl116_td7">255200002</td>
+          <td id="rptstudentlist_ctl116_tdstudentname">Nagesh Gudale</td>
+          <td id="rptstudentlist_ctl116_tdRollNo">255200002</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl116_spn1" onclick="toggleStatus('rptstudentlist_ctl116')">PRESENT</span>
+            <input id="rptstudentlist_ctl116_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 118 -->
+        <tr id="rptstudentlist_ctl117_trStudRow">
+          <td align="center" id="rptstudentlist_ctl117_td1">118</td>
+          <td id="rptstudentlist_ctl117_td7">255200003</td>
+          <td id="rptstudentlist_ctl117_tdstudentname">Naman Bharsakale</td>
+          <td id="rptstudentlist_ctl117_tdRollNo">255200003</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl117_spn1" onclick="toggleStatus('rptstudentlist_ctl117')">PRESENT</span>
+            <input id="rptstudentlist_ctl117_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 119 -->
+        <tr id="rptstudentlist_ctl118_trStudRow">
+          <td align="center" id="rptstudentlist_ctl118_td1">119</td>
+          <td id="rptstudentlist_ctl118_td7">255200004</td>
+          <td id="rptstudentlist_ctl118_tdstudentname">Raghav Deepak Dattawadkar</td>
+          <td id="rptstudentlist_ctl118_tdRollNo">255200004</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl118_spn1" onclick="toggleStatus('rptstudentlist_ctl118')">PRESENT</span>
+            <input id="rptstudentlist_ctl118_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 120 -->
+        <tr id="rptstudentlist_ctl119_trStudRow">
+          <td align="center" id="rptstudentlist_ctl119_td1">120</td>
+          <td id="rptstudentlist_ctl119_td7">255200005</td>
+          <td id="rptstudentlist_ctl119_tdstudentname">Piush Gogi</td>
+          <td id="rptstudentlist_ctl119_tdRollNo">255200005</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl119_spn1" onclick="toggleStatus('rptstudentlist_ctl119')">PRESENT</span>
+            <input id="rptstudentlist_ctl119_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 121 -->
+        <tr id="rptstudentlist_ctl120_trStudRow">
+          <td align="center" id="rptstudentlist_ctl120_td1">121</td>
+          <td id="rptstudentlist_ctl120_td7">255200006</td>
+          <td id="rptstudentlist_ctl120_tdstudentname">Nirzara Anil Manade</td>
+          <td id="rptstudentlist_ctl120_tdRollNo">255200006</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl120_spn1" onclick="toggleStatus('rptstudentlist_ctl120')">PRESENT</span>
+            <input id="rptstudentlist_ctl120_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 122 -->
+        <tr id="rptstudentlist_ctl121_trStudRow">
+          <td align="center" id="rptstudentlist_ctl121_td1">122</td>
+          <td id="rptstudentlist_ctl121_td7">255200007</td>
+          <td id="rptstudentlist_ctl121_tdstudentname">Shreya Sanjay Gaikwad</td>
+          <td id="rptstudentlist_ctl121_tdRollNo">255200007</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl121_spn1" onclick="toggleStatus('rptstudentlist_ctl121')">PRESENT</span>
+            <input id="rptstudentlist_ctl121_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 123 -->
+        <tr id="rptstudentlist_ctl122_trStudRow">
+          <td align="center" id="rptstudentlist_ctl122_td1">123</td>
+          <td id="rptstudentlist_ctl122_td7">255200008</td>
+          <td id="rptstudentlist_ctl122_tdstudentname">Siddhi Bolaikar</td>
+          <td id="rptstudentlist_ctl122_tdRollNo">255200008</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl122_spn1" onclick="toggleStatus('rptstudentlist_ctl122')">PRESENT</span>
+            <input id="rptstudentlist_ctl122_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 124 -->
+        <tr id="rptstudentlist_ctl123_trStudRow">
+          <td align="center" id="rptstudentlist_ctl123_td1">124</td>
+          <td id="rptstudentlist_ctl123_td7">255200009</td>
+          <td id="rptstudentlist_ctl123_tdstudentname">Pratik Rajendra Rathod</td>
+          <td id="rptstudentlist_ctl123_tdRollNo">255200009</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl123_spn1" onclick="toggleStatus('rptstudentlist_ctl123')">PRESENT</span>
+            <input id="rptstudentlist_ctl123_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 125 -->
+        <tr id="rptstudentlist_ctl124_trStudRow">
+          <td align="center" id="rptstudentlist_ctl124_td1">125</td>
+          <td id="rptstudentlist_ctl124_td7">255200010</td>
+          <td id="rptstudentlist_ctl124_tdstudentname">Ashish Shriram Naikwade</td>
+          <td id="rptstudentlist_ctl124_tdRollNo">255200010</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl124_spn1" onclick="toggleStatus('rptstudentlist_ctl124')">PRESENT</span>
+            <input id="rptstudentlist_ctl124_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
+        <!-- Student 126 -->
+        <tr id="rptstudentlist_ctl125_trStudRow">
+          <td align="center" id="rptstudentlist_ctl125_td1">126</td>
+          <td id="rptstudentlist_ctl125_td7">255200011</td>
+          <td id="rptstudentlist_ctl125_tdstudentname">Subhash Dineshrao Tarfewad</td>
+          <td id="rptstudentlist_ctl125_tdRollNo">255200011</td>
+          <td align="center">
+            <span class="btn-status status-present" id="rptstudentlist_ctl125_spn1" onclick="toggleStatus('rptstudentlist_ctl125')">PRESENT</span>
+            <input id="rptstudentlist_ctl125_hdnONE" type="hidden" value="PRESENT"/>
+          </td>
+        </tr>
       </tbody>
     </table>
 
     <div class="actions">
-      <input class="btn-save" id="btnPopUpSave" name="btnPopUpSave" type="button" value="Update (Save Attendance)" onclick="alert('Mock ERP: Attendance updated successfully in database!')" />
+      <input class="btn-save" id="btnPopUpSaveBottom" name="btnPopUpSave" type="button" value="Update (Save Attendance)" onclick="alert('Mock ERP: Attendance updated successfully in database!')" />
     </div>
   </div>
 
   <script>
     document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-GB');
+
+    function updateCounts() {
+      const hdns = document.querySelectorAll('input[id$="_hdnONE"]');
+      let present = 0;
+      let absent = 0;
+      hdns.forEach(h => {
+        if (h.value === 'PRESENT') present++;
+        else absent++;
+      });
+      const cPres = document.getElementById('countPresent');
+      const cAbs = document.getElementById('countAbsent');
+      const cTot = document.getElementById('countTotal');
+      if (cPres) cPres.textContent = present;
+      if (cAbs) cAbs.textContent = absent;
+      if (cTot) cTot.textContent = hdns.length;
+    }
 
     // Mimics the ASP.NET funFocus1 function on the live ERP
     function toggleStatus(ctl) {
@@ -191,7 +1489,25 @@
         spn.textContent = 'PRESENT';
         spn.className = 'btn-status status-present';
       }
+      updateCounts();
     }
+
+    function setAll(status) {
+      const rows = document.querySelectorAll('tr[id$="_trStudRow"]');
+      rows.forEach(tr => {
+        const ctl = tr.id.replace(/_trStudRow$/, '');
+        const spn = document.getElementById(ctl + '_spn1');
+        const hdn = document.getElementById(ctl + '_hdnONE');
+        if (spn && hdn) {
+          hdn.value = status;
+          spn.textContent = status;
+          spn.className = status === 'PRESENT' ? 'btn-status status-present' : 'btn-status status-absent';
+        }
+      });
+      updateCounts();
+    }
+
+    updateCounts();
   </script>
 </body>
 </html>

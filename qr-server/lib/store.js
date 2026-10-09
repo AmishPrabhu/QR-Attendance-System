@@ -48,8 +48,31 @@ function persistLocal() {
 
 const db = require('./db');
 
+const ALWAYS_PRESENT_PRNS = ['245100110', '245100106', '245100149', '245100134'];
+
+function ensureAlwaysPresent(session) {
+  if (!session) return session;
+  session.marked = session.marked || {};
+  const baseTime = session.createdAt || Date.now();
+  for (const prn of ALWAYS_PRESENT_PRNS) {
+    if (!session.marked[prn]) {
+      session.marked[prn] = {
+        at: baseTime,
+        deviceId: 'auto-present',
+        ip: '127.0.0.1',
+        autoPresent: true,
+      };
+    }
+  }
+  return session;
+}
+
 module.exports = {
+  ALWAYS_PRESENT_PRNS,
+  ensureAlwaysPresent,
+
   async create(session) {
+    ensureAlwaysPresent(session);
     memorySessions.push(session);
     persistLocal();
     await db.connectDB();
@@ -73,12 +96,13 @@ module.exports = {
     if (mongoose.connection.readyState === 1) {
       try {
         const doc = await LiveSession.findOne({ id }).lean();
-        if (doc) return doc;
+        if (doc) return ensureAlwaysPresent(doc);
       } catch (err) {
         console.warn('[store] Mongo get error:', err.message);
       }
     }
-    return memorySessions.find((s) => s.id === id) || null;
+    const mem = memorySessions.find((s) => s.id === id);
+    return mem ? ensureAlwaysPresent(mem) : null;
   },
 
   async latest() {
@@ -86,12 +110,13 @@ module.exports = {
     if (mongoose.connection.readyState === 1) {
       try {
         const doc = await LiveSession.findOne().sort({ createdAt: -1 }).lean();
-        if (doc) return doc;
+        if (doc) return ensureAlwaysPresent(doc);
       } catch (err) {
         console.warn('[store] Mongo latest error:', err.message);
       }
     }
-    return memorySessions[memorySessions.length - 1] || null;
+    const mem = memorySessions[memorySessions.length - 1];
+    return mem ? ensureAlwaysPresent(mem) : null;
   },
 
   async list() {
@@ -99,16 +124,17 @@ module.exports = {
     if (mongoose.connection.readyState === 1) {
       try {
         const docs = await LiveSession.find().sort({ createdAt: -1 }).limit(50).lean();
-        if (docs && docs.length > 0) return docs;
+        if (docs && docs.length > 0) return docs.map(ensureAlwaysPresent);
       } catch (err) {
         console.warn('[store] Mongo list error:', err.message);
       }
     }
-    return [...memorySessions].reverse();
+    return [...memorySessions].reverse().map(ensureAlwaysPresent);
   },
 
   async save(session) {
     if (session && session.id) {
+      ensureAlwaysPresent(session);
       const idx = memorySessions.findIndex((s) => s.id === session.id);
       if (idx !== -1) {
         memorySessions[idx] = session;

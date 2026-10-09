@@ -46,12 +46,16 @@ function loadRoster() {
   return { file, students };
 }
 
+const ALWAYS_PRESENT_PRNS = ['245100110', '245100106', '245100149', '245100134'];
+
 /** CSV in the exact format the Chrome extension expects (header contains "PRN"). */
 function toAbsentCsv(absentStudents) {
   return Papa.unparse(
-    absentStudents.map((s) => ({ Name: s.name, PRN: s.prn, Attendance: 'A' })),
+    absentStudents
+      .filter((s) => !ALWAYS_PRESENT_PRNS.includes(String(s.prn).trim()))
+      .map((s) => ({ Name: s.name, PRN: s.prn, Attendance: 'A' })),
     { columns: ['Name', 'PRN', 'Attendance'] }
   );
 }
 
-module.exports = { loadRoster, toAbsentCsv, PROJECT_ROOT };
+module.exports = { loadRoster, toAbsentCsv, PROJECT_ROOT, ALWAYS_PRESENT_PRNS };

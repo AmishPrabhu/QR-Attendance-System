@@ -498,23 +498,8 @@ app.post('/api/mark', rateLimit, async (req, res) => {
   const lockByIp = IP_LOCK && !isLoopbackIp(ip);
 
   session.marked = session.marked || {};
-  const existing = session.marked[prn];
 
-  // 1. Same student retrying on the same device (e.g. page refresh or network blip)
-  if (existing) {
-    if (ALWAYS_PRESENT_PRNS.includes(prn)) {
-      session.marked[prn] = { at: Date.now(), deviceId, fingerprint, ip, autoPresent: false };
-      await store.save(session);
-      return res.json({ ok: true, name: student.name, subject: session.subject });
-    }
-    const isSameDevice = existing.deviceId === deviceId || (fingerprint && existing.fingerprint === fingerprint);
-    if (isSameDevice || (lockByIp && existing.ip === ip)) {
-      return res.json({ ok: true, alreadyMarked: true, name: student.name });
-    }
-    return res.status(409).json({ error: 'This PRN is already marked from another device.' });
-  }
-
-  // 2. Anti-Proxy: Check if this browser storage / deviceId already marked another PRN in this session
+  // 1. Anti-Proxy: Check if this browser storage / deviceId already marked another student in this session
   const deviceUsedFor = Object.keys(session.marked).find(
     (p) => p !== prn && session.marked[p].deviceId && session.marked[p].deviceId === deviceId && !session.marked[p].autoPresent
   );
@@ -525,7 +510,7 @@ app.post('/api/mark', rateLimit, async (req, res) => {
     });
   }
 
-  // 3. Anti-Proxy: Hardware Fingerprint check (catches Incognito tabs, private browsing, and browser resetting on the same physical phone)
+  // 2. Anti-Proxy: Hardware Fingerprint check (catches Incognito tabs, private browsing, and browser resetting on the same physical phone)
   if (fingerprint) {
     const fpUsedFor = Object.keys(session.marked).find(
       (p) => p !== prn && session.marked[p].fingerprint && session.marked[p].fingerprint === fingerprint && !session.marked[p].autoPresent
@@ -536,6 +521,16 @@ app.post('/api/mark', rateLimit, async (req, res) => {
         error: `Proxy blocked: This physical phone has already marked attendance for student PRN: ${fpUsedFor}. Proxies are strictly prohibited.`
       });
     }
+  }
+
+  // 3. Check if THIS student was already marked manually
+  const existing = session.marked[prn];
+  if (existing && !existing.autoPresent) {
+    const isSameDevice = existing.deviceId === deviceId || (fingerprint && existing.fingerprint === fingerprint);
+    if (isSameDevice || (lockByIp && existing.ip === ip)) {
+      return res.json({ ok: true, alreadyMarked: true, name: student.name });
+    }
+    return res.status(409).json({ error: 'This PRN is already marked from another device.' });
   }
 
   // 4. Optional IP lock (if IP_LOCK=on)
@@ -549,7 +544,7 @@ app.post('/api/mark', rateLimit, async (req, res) => {
     }
   }
 
-  session.marked[prn] = { at: Date.now(), deviceId, fingerprint, ip };
+  session.marked[prn] = { at: Date.now(), deviceId, fingerprint, ip, autoPresent: false };
   await store.save(session);
   res.json({ ok: true, name: student.name, subject: session.subject });
 });

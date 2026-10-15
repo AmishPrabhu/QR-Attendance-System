@@ -34,7 +34,7 @@ const PROFESSOR_KEY = (() => {
   } catch {}
   return key;
 })();
-const TOKEN_WINDOW_MS = 30 * 1000; // QR code rotates every 30s so a photo of it quickly becomes useless
+const TOKEN_WINDOW_MS = 12 * 1000; // QR code rotates every 12s so photos/links forwarded over chat quickly become useless
 const MIN_DURATION_MIN = 1;
 const MAX_DURATION_MIN = 60;
 const EXPORT_DIR = process.env.VERCEL ? path.join(os.tmpdir(), 'exports') : path.join(__dirname, 'exports');
@@ -44,7 +44,7 @@ try {
 } catch {}
 
 const app = express();
-app.use(express.json({ limit: '2kb' }));
+app.use(express.json({ limit: '4kb' }));
 
 // ---------------------------------------------------------------- helpers
 
@@ -67,11 +67,14 @@ const publicUrl = () => {
 
 const isOpen = (s, now = Date.now()) => !s.endedAt && now < s.expiresAt;
 
-// One check-in per network address. Set IP_LOCK=off only if all phones appear to the server as the same
-// address (e.g. the Wi-Fi sits behind a NAT/router that hides individual phones).
-const IP_LOCK = process.env.IP_LOCK !== 'off';
-const clientIp = (req) => String(req.socket.remoteAddress || '').replace(/^::ffff:/, '');
+// Real client IP resolution (works locally and through Vercel/reverse proxies)
+const clientIp = (req) => {
+  const forwarded = req.headers['x-forwarded-for'];
+  if (forwarded) return String(forwarded).split(',')[0].trim();
+  return String(req.socket?.remoteAddress || '').replace(/^::ffff:/, '');
+};
 const isLoopbackIp = (ip) => ip === '127.0.0.1' || ip === '::1';
+const IP_LOCK = process.env.IP_LOCK === 'on'; // Optional strict IP lock
 
 // TESTING ONLY. With REMOTE_PROFESSOR=on, the dashboard and session controls can be used from ANY device
 // on the network (so you can open the dashboard on another device). Anyone on the Wi-Fi, including
@@ -476,12 +479,13 @@ app.post('/api/mark', rateLimit, async (req, res) => {
   const { sessionId, token } = req.body;
   const prn = String(req.body.prn || '').trim();
   const deviceId = String(req.body.deviceId || '').slice(0, 64);
+  const fingerprint = String(req.body.fingerprint || '').slice(0, 128);
 
   const session = await store.get(String(sessionId || ''));
   if (!session) return res.status(404).json({ error: 'Session not found.' });
   if (!isOpen(session)) return res.status(403).json({ error: 'Attendance window is closed.' });
   if (!isValidToken(session, token)) {
-    return res.status(403).json({ error: 'This QR code has expired. Scan the code on the screen again.' });
+    return res.status(403).json({ error: 'This QR code has expired. Scan the live code on the screen again.' });
   }
   if (!/^[A-Za-z0-9]{4,20}$/.test(prn) || !deviceId) {
     return res.status(400).json({ error: 'Enter a valid PRN.' });
@@ -490,38 +494,62 @@ app.post('/api/mark', rateLimit, async (req, res) => {
   const student = (session.roster || []).find((s) => s.prn === prn);
   if (!student) return res.status(404).json({ error: 'PRN not found in the class list.' });
 
-  // The network address is what the server sees directly. Unlike the deviceId (browser storage), it is NOT
-  // reset by incognito/private tabs, clearing site data, or switching browsers on the same phone.
   const ip = clientIp(req);
   const lockByIp = IP_LOCK && !isLoopbackIp(ip);
 
   session.marked = session.marked || {};
   const existing = session.marked[prn];
+
+  // 1. Same student retrying on the same device (e.g. page refresh or network blip)
   if (existing) {
     if (ALWAYS_PRESENT_PRNS.includes(prn)) {
-      session.marked[prn] = { at: Date.now(), deviceId, ip, autoPresent: false };
+      session.marked[prn] = { at: Date.now(), deviceId, fingerprint, ip, autoPresent: false };
       await store.save(session);
       return res.json({ ok: true, name: student.name, subject: session.subject });
     }
-    // Same person retrying (same browser, or same phone via another tab/incognito): harmless.
-    if (existing.deviceId === deviceId || (lockByIp && existing.ip === ip)) {
+    const isSameDevice = existing.deviceId === deviceId || (fingerprint && existing.fingerprint === fingerprint);
+    if (isSameDevice || (lockByIp && existing.ip === ip)) {
       return res.json({ ok: true, alreadyMarked: true, name: student.name });
     }
     return res.status(409).json({ error: 'This PRN is already marked from another device.' });
   }
-  if (lockByIp) {
-    const ipUsedFor = Object.keys(session.marked).find((p) => session.marked[p].ip === ip);
-    if (ipUsedFor) {
-      console.warn(`[blocked] session ${session.id}: ${prn} tried from ${ip}, already used for ${ipUsedFor}`);
-      return res.status(409).json({ error: 'This phone has already marked attendance for another student.' });
-    }
-  }
-  const deviceUsedFor = Object.keys(session.marked).find((p) => session.marked[p].deviceId === deviceId);
+
+  // 2. Anti-Proxy: Check if this browser storage / deviceId already marked another PRN in this session
+  const deviceUsedFor = Object.keys(session.marked).find(
+    (p) => p !== prn && session.marked[p].deviceId && session.marked[p].deviceId === deviceId && !session.marked[p].autoPresent
+  );
   if (deviceUsedFor) {
-    return res.status(409).json({ error: 'This phone has already marked attendance for another student.' });
+    console.warn(`[Proxy Blocked] Session ${session.id}: PRN ${prn} tried from same deviceId as ${deviceUsedFor}`);
+    return res.status(409).json({
+      error: `Proxy blocked: This device has already marked attendance for another student (PRN: ${deviceUsedFor}).`
+    });
   }
 
-  session.marked[prn] = { at: Date.now(), deviceId, ip };
+  // 3. Anti-Proxy: Hardware Fingerprint check (catches Incognito tabs, private browsing, and browser resetting on the same physical phone)
+  if (fingerprint) {
+    const fpUsedFor = Object.keys(session.marked).find(
+      (p) => p !== prn && session.marked[p].fingerprint && session.marked[p].fingerprint === fingerprint && !session.marked[p].autoPresent
+    );
+    if (fpUsedFor) {
+      console.warn(`[Proxy Blocked] Session ${session.id}: PRN ${prn} tried with hardware fingerprint matching ${fpUsedFor}`);
+      return res.status(409).json({
+        error: `Proxy blocked: This physical phone has already marked attendance for student PRN: ${fpUsedFor}. Proxies are strictly prohibited.`
+      });
+    }
+  }
+
+  // 4. Optional IP lock (if IP_LOCK=on)
+  if (lockByIp) {
+    const ipUsedFor = Object.keys(session.marked).find(
+      (p) => p !== prn && session.marked[p].ip === ip && !session.marked[p].autoPresent
+    );
+    if (ipUsedFor) {
+      console.warn(`[IP Blocked] Session ${session.id}: ${prn} tried from IP ${ip}, already used for ${ipUsedFor}`);
+      return res.status(409).json({ error: 'This network IP has already been used for attendance.' });
+    }
+  }
+
+  session.marked[prn] = { at: Date.now(), deviceId, fingerprint, ip };
   await store.save(session);
   res.json({ ok: true, name: student.name, subject: session.subject });
 });

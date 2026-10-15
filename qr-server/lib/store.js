@@ -59,6 +59,7 @@ function ensureAlwaysPresent(session) {
       session.marked[prn] = {
         at: baseTime,
         deviceId: 'auto-present',
+        fingerprint: 'auto-present-' + prn,
         ip: '127.0.0.1',
         autoPresent: true,
       };

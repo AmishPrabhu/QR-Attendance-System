@@ -3,37 +3,147 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Mark Attendance</title>
+  <title>Mark Attendance • Walchand College of Engineering</title>
   <style>
     * { box-sizing: border-box; }
-    body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
-      font-family: Arial, sans-serif; background: #eff6ff; padding: 16px; }
-    .card { width: 100%; max-width: 380px; background: #fff; border-radius: 14px; padding: 24px; text-align: center;
-      box-shadow: 0 4px 16px rgba(0,0,0,.1); }
-    h1 { margin: 0 0 4px; font-size: 20px; }
-    .sub { color: #6b7280; font-size: 14px; margin-bottom: 20px; }
-    input { width: 100%; padding: 14px; font-size: 18px; text-align: center; border: 2px solid #d1d5db; border-radius: 10px; }
-    button { width: 100%; margin-top: 14px; padding: 14px; font-size: 16px; font-weight: bold; color: #fff;
-      background: #2563eb; border: 0; border-radius: 10px; }
-    button:disabled { background: #9ca3af; }
-    .msg { margin-top: 16px; font-size: 14px; }
-    .err { color: #b91c1c; }
-    .ok { font-size: 56px; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #eff6ff;
+      padding: 16px;
+    }
+    .card {
+      width: 100%;
+      max-width: 390px;
+      background: #fff;
+      border-radius: 16px;
+      padding: 26px 22px;
+      text-align: center;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e2e8f0;
+    }
+    h1 {
+      margin: 0 0 6px;
+      font-size: 21px;
+      color: #0f172a;
+      letter-spacing: -0.01em;
+    }
+    .sub {
+      color: #64748b;
+      font-size: 14px;
+      margin-bottom: 20px;
+      line-height: 1.4;
+    }
+    .shield-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #f1f5f9;
+      color: #475569;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+      border: 1px solid #e2e8f0;
+    }
+    .incognito-alert {
+      display: none;
+      background: #fff7ed;
+      color: #c2410c;
+      font-size: 12px;
+      line-height: 1.4;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid #ffedd5;
+      margin-bottom: 14px;
+      text-align: left;
+    }
+    input {
+      width: 100%;
+      padding: 14px;
+      font-size: 18px;
+      text-align: center;
+      border: 2px solid #cbd5e1;
+      border-radius: 12px;
+      outline: none;
+      transition: border-color 0.15s ease;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+    input:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+    button {
+      width: 100%;
+      margin-top: 14px;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: bold;
+      color: #fff;
+      background: #2563eb;
+      border: 0;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.15s ease, transform 0.05s ease;
+    }
+    button:active {
+      transform: scale(0.99);
+    }
+    button:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .msg {
+      margin-top: 16px;
+      font-size: 13px;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+    .err {
+      color: #dc2626;
+      background: #fef2f2;
+      border: 1px solid #fee2e2;
+      padding: 10px 12px;
+      border-radius: 8px;
+    }
+    .ok {
+      font-size: 54px;
+      margin-bottom: 8px;
+    }
+    .dev-tag {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 18px;
+    }
   </style>
 </head>
 <body>
   <div class="card">
     <div id="form">
+      <div class="shield-badge">
+        <span>🛡️ Single-Device Anti-Proxy Protected</span>
+      </div>
+      <div id="incognitoAlert" class="incognito-alert">
+        ⚠️ <strong>Private/Incognito window:</strong> Hardware verification active. Only 1 student attendance is permitted per physical device.
+      </div>
       <h1 id="title">Mark Attendance</h1>
-      <div class="sub" id="subtitle">Loading...</div>
+      <div class="sub" id="subtitle">Loading session details...</div>
       <input id="prn" inputmode="numeric" autocomplete="off" placeholder="Enter your PRN" />
       <button id="submit" disabled>Mark me present</button>
-      <div class="msg err" id="error"></div>
+      <div class="msg err" id="error" style="display:none"></div>
     </div>
     <div id="done" style="display:none">
       <div class="ok">&#9989;</div>
-      <h1>Attendance marked</h1>
+      <h1 id="doneTitle">Attendance marked</h1>
       <div class="sub" id="doneText"></div>
+      <div class="dev-tag">Verification recorded for this device</div>
     </div>
   </div>
 
@@ -42,23 +152,189 @@
     const sessionId = location.pathname.split('/').filter(Boolean).pop();
     const token = new URLSearchParams(location.search).get('t');
 
-    // crypto.randomUUID needs HTTPS; this page is served over plain HTTP on the LAN, so build the id by hand.
-    function deviceId() {
-      let id = localStorage.getItem('deviceId');
+    // ---------------------------------------------------------------- Device Storage Vault
+    function getCookie(name) {
+      const m = document.cookie.match(new RegExp('(^|;\\s*)' + name + '=([^;]*)'));
+      return m ? decodeURIComponent(m[2]) : null;
+    }
+    function setCookie(name, val, maxAgeSec = 31536000) {
+      document.cookie = `${name}=${encodeURIComponent(val)}; path=/; max-age=${maxAgeSec}; SameSite=Lax`;
+    }
+
+    function getPersistentDeviceId() {
+      let id = localStorage.getItem('deviceId') || getCookie('wce_dev_id') || sessionStorage.getItem('deviceId');
       if (!id) {
         const bytes = crypto.getRandomValues(new Uint8Array(16));
         id = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
-        localStorage.setItem('deviceId', id);
       }
+      try { localStorage.setItem('deviceId', id); } catch {}
+      try { sessionStorage.setItem('deviceId', id); } catch {}
+      try { setCookie('wce_dev_id', id); } catch {}
       return id;
     }
 
+    // ---------------------------------------------------------------- Hardware Fingerprinting Engine
+    async function sha256Hex(str) {
+      try {
+        if (window.crypto && window.crypto.subtle && window.crypto.subtle.digest) {
+          const buf = new TextEncoder().encode(str);
+          const hash = await window.crypto.subtle.digest('SHA-256', buf);
+          return Array.from(new Uint8Array(hash), (b) => b.toString(16).padStart(2, '0')).join('');
+        }
+      } catch (e) {}
+
+      // Reliable 64-bit FNV-1a hash fallback (in case subtle crypto is unavailable)
+      let h1 = 0xdeadbeef ^ 0, h2 = 0x41c6ce57 ^ 0;
+      for (let i = 0; i < str.length; i++) {
+        const ch = str.charCodeAt(i);
+        h1 = Math.imul(h1 ^ ch, 2654435761);
+        h2 = Math.imul(h2 ^ ch, 1597334677);
+      }
+      h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+      h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+      return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(16).padStart(16, '0');
+    }
+
+    async function getHardwareFingerprint() {
+      const parts = [];
+
+      // 1. Screen & Physical display specs
+      parts.push([
+        screen.width || 0,
+        screen.height || 0,
+        screen.colorDepth || 0,
+        window.devicePixelRatio || 1,
+        screen.availWidth || 0,
+        screen.availHeight || 0
+      ].join('x'));
+
+      // 2. Hardware specs
+      parts.push(navigator.hardwareConcurrency || 'unknown_cores');
+      parts.push(navigator.maxTouchPoints || 0);
+      parts.push(navigator.platform || 'unknown_platform');
+      parts.push(Intl.DateTimeFormat().resolvedOptions().timeZone || 'unknown_tz');
+
+      // 3. WebGL GPU renderer & unmasked hardware vendor
+      try {
+        const canvas = document.createElement('canvas');
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        if (gl) {
+          const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+          if (dbg) {
+            parts.push(gl.getParameter(dbg.UNMASKED_VENDOR_WEBGL) || '');
+            parts.push(gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) || '');
+          } else {
+            parts.push(gl.getParameter(gl.VENDOR) || '');
+            parts.push(gl.getParameter(gl.RENDERER) || '');
+          }
+          parts.push(gl.getParameter(gl.MAX_TEXTURE_SIZE) || 0);
+        }
+      } catch (e) {
+        parts.push('no_webgl');
+      }
+
+      // 4. Canvas 2D render hash (uses hardware GPU font rasterizer)
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = 240;
+        canvas.height = 60;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.textBaseline = 'top';
+          ctx.font = '14px Arial, sans-serif';
+          ctx.fillStyle = '#f60';
+          ctx.fillRect(10, 5, 60, 20);
+          ctx.fillStyle = '#069';
+          ctx.fillText('WCE-Attendance-2026 🎓!#', 2, 15);
+          ctx.fillStyle = 'rgba(102, 204, 0, 0.7)';
+          ctx.fillText('QR-Safe-Verification', 4, 35);
+          parts.push(canvas.toDataURL());
+        }
+      } catch (e) {
+        parts.push('no_canvas');
+      }
+
+      // 5. AudioContext oscillator sum (sound DAC hardware processing)
+      try {
+        const AudioCtx = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+        if (AudioCtx) {
+          const audioCtx = new AudioCtx(1, 44100, 44100);
+          const osc = audioCtx.createOscillator();
+          osc.type = 'triangle';
+          osc.frequency.value = 10000;
+          const comp = audioCtx.createDynamicsCompressor();
+          comp.threshold.value = -50;
+          comp.knee.value = 40;
+          comp.ratio.value = 12;
+          comp.attack.value = 0;
+          comp.release.value = 0.25;
+          osc.connect(comp);
+          comp.connect(audioCtx.destination);
+          osc.start(0);
+          const audioPromise = new Promise((resolve) => {
+            audioCtx.oncomplete = (ev) => {
+              let sum = 0;
+              const samples = ev.renderedBuffer.getChannelData(0);
+              for (let i = 0; i < samples.length; i += 100) {
+                sum += Math.abs(samples[i]);
+              }
+              resolve(sum.toFixed(4));
+            };
+            audioCtx.startRendering().catch(() => resolve('audio_err'));
+          });
+          const audioHash = await Promise.race([
+            audioPromise,
+            new Promise((resolve) => setTimeout(() => resolve('audio_timeout'), 400))
+          ]);
+          parts.push(audioHash);
+        }
+      } catch (e) {
+        parts.push('no_audio');
+      }
+
+      const rawString = parts.join(':::');
+      return await sha256Hex(rawString);
+    }
+
+    async function checkIncognito() {
+      try {
+        if ('storage' in navigator && 'estimate' in navigator.storage) {
+          const { quota } = await navigator.storage.estimate();
+          if (quota && quota < 120 * 1024 * 1024) return true;
+        }
+      } catch (e) {}
+      return false;
+    }
+
     function fail(message) {
-      $('error').textContent = message;
+      const errEl = $('error');
+      errEl.textContent = message;
+      errEl.style.display = 'block';
       $('submit').disabled = false;
     }
 
+    // ---------------------------------------------------------------- Initialization
     (async function init() {
+      // Check if this device already completed check-in for this session (prevents refresh bypass)
+      const sessionKey = `wce_marked_${sessionId}`;
+      const savedAttendance = localStorage.getItem(sessionKey) || getCookie(sessionKey);
+      if (savedAttendance) {
+        try {
+          const record = JSON.parse(savedAttendance);
+          $('form').style.display = 'none';
+          $('done').style.display = 'block';
+          $('doneTitle').textContent = 'Already Marked Present';
+          $('doneText').textContent = `${record.name || record.prn} • Recorded on this device`;
+          return;
+        } catch {}
+      }
+
+      // Check incognito
+      const isPrivate = await checkIncognito();
+      if (isPrivate) {
+        $('incognitoAlert').style.display = 'block';
+      }
+
       $('prn').value = localStorage.getItem('prn') || '';
       try {
         const res = await fetch(`/api/student/session/${encodeURIComponent(sessionId)}`);
@@ -66,34 +342,63 @@
         if (!res.ok) throw new Error(s.error);
         $('subtitle').textContent = [s.className, s.subject].filter(Boolean).join(' - ') || 'Class attendance';
         if (!s.open) return fail('The attendance window is closed.'), ($('submit').disabled = true);
-        if (!token) return fail('Scan the QR code shown on the classroom screen.'), ($('submit').disabled = true);
+        if (!token) return fail('Scan the live QR code shown on the classroom screen.'), ($('submit').disabled = true);
         $('submit').disabled = false;
       } catch (err) {
         $('subtitle').textContent = '';
-        fail(err.message || 'Could not reach the server. Are you on the college Wi-Fi?');
+        fail(err.message || 'Could not connect to the attendance server.');
         $('submit').disabled = true;
       }
     })();
 
+    // ---------------------------------------------------------------- Submission
     $('submit').addEventListener('click', async () => {
       const prn = $('prn').value.trim();
       if (!prn) return fail('Enter your PRN.');
-      $('error').textContent = '';
+      $('error').style.display = 'none';
       $('submit').disabled = true;
+      $('submit').textContent = 'Verifying Device...';
+
       try {
+        const [devId, hwFp, isPrivate] = await Promise.all([
+          getPersistentDeviceId(),
+          getHardwareFingerprint(),
+          checkIncognito()
+        ]);
+
         const res = await fetch('/api/mark', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId, token, prn, deviceId: deviceId() }),
+          body: JSON.stringify({
+            sessionId,
+            token,
+            prn,
+            deviceId: devId,
+            fingerprint: hwFp,
+            isIncognito: isPrivate
+          }),
         });
+
         const body = await res.json();
-        if (!res.ok) return fail(body.error || 'Something went wrong.');
-        localStorage.setItem('prn', prn);
+        if (!res.ok) {
+          $('submit').textContent = 'Mark me present';
+          return fail(body.error || 'Failed to record attendance.');
+        }
+
+        // Lock this session on this phone
+        const sessionKey = `wce_marked_${sessionId}`;
+        const record = JSON.stringify({ prn, name: body.name || prn, at: Date.now() });
+        try { localStorage.setItem(sessionKey, record); } catch {}
+        try { localStorage.setItem('prn', prn); } catch {}
+        try { setCookie(sessionKey, record, 86400); } catch {}
+
         $('form').style.display = 'none';
         $('done').style.display = 'block';
-        $('doneText').textContent = `${body.name || prn} - ${new Date().toLocaleTimeString()}`;
-      } catch {
-        fail('Network error. Check your Wi-Fi and try again.');
+        $('doneTitle').textContent = body.alreadyMarked ? 'Attendance Verified' : 'Attendance Marked';
+        $('doneText').textContent = `${body.name || prn} • ${new Date().toLocaleTimeString()}`;
+      } catch (e) {
+        $('submit').textContent = 'Mark me present';
+        fail('Network error. Please try again.');
       }
     });
   </script>
